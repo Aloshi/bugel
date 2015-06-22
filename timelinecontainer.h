@@ -11,6 +11,8 @@ class TimelineContainer;
 
 class QScrollArea;
 class QVBoxLayout;
+class TimelineWidget;
+class PlaybackWidget;
 
 class TimelineContainer : public QWidget
 {
@@ -32,6 +34,9 @@ private:
 
     QScrollArea* mLayerScrollArea;
     QVBoxLayout* mLayerLayout;
+    PlaybackWidget* mPlaybackWidget;
+    TimelineWidget* mTimelineWidget;
+
     Timeline mTimeline;
 };
 

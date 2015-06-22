@@ -34,6 +34,12 @@ void TimelineWidget::setCursor(double time)
     update();
 }
 
+void TimelineWidget::setLength(double length)
+{
+    mLength = length;
+    update();
+}
+
 void TimelineWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
@@ -53,7 +59,9 @@ void TimelineWidget::paintEvent(QPaintEvent*)
 
     static const QPen outOfRangePen(QColor(255, 0, 0));
     static const QPen inRangePen(QColor(0, 0, 0));
-    static const QBrush bigTickBrush(QColor(0, 0, 0));
+
+    static const QBrush inRangeBrush(QColor(0, 0, 0));
+    static const QBrush outOfRangeBrush(QColor(255, 0, 0));
 
     // start one interval early so we get subticks on the left
     curInterval -= interval;
@@ -88,21 +96,28 @@ void TimelineWidget::paintEvent(QPaintEvent*)
                                 size().height() * (1 - bigTickHeightPerc),  // y
                                 bigTickWidth,                               // width
                                 (size().height() * bigTickHeightPerc) - 1), // height
-                         bigTickBrush);
+                         inRange(curInterval) ? inRangeBrush : outOfRangeBrush);
 
         curInterval += interval;
 
         // draw sub-ticks
         for (int j = 1; j < numSubTicks; j++) {
+            const double subTickTime = curInterval -
+                    ((double)j / numSubTicks) * interval;
             const float left = i + j * ((float)1 / numSubTicks * pxPerInterval);
             static const float subTickHeightPerc = 0.2f;
             painter.fillRect(QRectF(left, size().height() * (1 - subTickHeightPerc),
                                     1, (size().height() * subTickHeightPerc) - 1),
-                             bigTickBrush);
+                             inRange(subTickTime) ? inRangeBrush : outOfRangeBrush);
         }
     }
 
     // draw cursor
     painter.fillRect(QRectF(((mCursor - mViewOffset) * pxPerSecond) - 1, 0,
                             2, size().height()), QBrush(QColor(0, 0, 20)));
+}
+
+bool TimelineWidget::inRange(double time)
+{
+    return (time >= 0 && time < mLength);
 }

@@ -2,6 +2,7 @@
 #define TIMELINEWIDGET_H
 
 #include <QWidget>
+#include <QElapsedTimer>
 
 class TimelineWidget : public QWidget
 {
@@ -9,7 +10,11 @@ class TimelineWidget : public QWidget
 public:
     explicit TimelineWidget(QWidget *parent = 0);
 
+    inline double cursor() const { return mCursor; } // in seconds
+
 protected:
+    bool inRange(double time);
+
     void paintEvent(QPaintEvent* ev) /* override */;
     void mousePressEvent(QMouseEvent* ev) /* override */;
     // void mouseReleaseEvent(QMouseEvent* ev) /* override */;
@@ -20,6 +25,7 @@ signals:
 
 public slots:
     void setCursor(double time);
+    void setLength(double length);
 
 private:
     double mCursor; // in seconds

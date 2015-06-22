@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,15 +19,20 @@ SOURCES += main.cpp\
     timelinelayerwidget.cpp \
     timeline.cpp \
     timelinecontainer.cpp \
-    timelinewidget.cpp
+    timelinewidget.cpp \
+    playbackwidget.cpp \
+    util.cpp
 
 HEADERS  += mainwindow.h \
     timelinelayerwidget.h \
     timeline.h \
     timelinecontainer.h \
-    timelinewidget.h
+    timelinewidget.h \
+    playbackwidget.h \
+    util.h
 
 FORMS    += mainwindow.ui \
     timelinelayerwidget.ui \
-    timelinecontainer.ui
+    timelinecontainer.ui \
+    playbackwidget.ui
 

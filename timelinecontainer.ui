@@ -15,9 +15,23 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="PlaybackWidget" name="playback_widget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="TimelineWidget" name="widget" native="true">
+      <widget class="TimelineWidget" name="timeline_widget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -45,7 +59,7 @@
         <x>0</x>
         <y>0</y>
         <width>633</width>
-        <height>234</height>
+        <height>204</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3"/>
@@ -59,6 +73,12 @@
    <class>TimelineWidget</class>
    <extends>QWidget</extends>
    <header>timelinewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlaybackWidget</class>
+   <extends>QWidget</extends>
+   <header>playbackwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
