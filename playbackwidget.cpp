@@ -39,7 +39,7 @@ void PlaybackWidget::setMedia(const QMediaContent &media)
 
 void PlaybackWidget::setPosition(double time)
 {
-    mMediaPlayer.setPosition(Util::secToNs(time));
+    mMediaPlayer.setPosition((qint64)(time * 1000.0));
 }
 
 void PlaybackWidget::togglePlaying()

@@ -23,8 +23,8 @@ void TimelineWidget::wheelEvent(QWheelEvent* ev)
 void TimelineWidget::mousePressEvent(QMouseEvent* ev)
 {
     // 80 / 15 should be pxPerSecond
-    double newCursor = ev->x() / (80.0 / 15.0) + mViewOffset;
-    setCursor(newCursor);
+    double time = ev->x() / (80.0 / 15.0) + mViewOffset;
+    emit timeClicked(time);
 }
 
 void TimelineWidget::setCursor(double time)

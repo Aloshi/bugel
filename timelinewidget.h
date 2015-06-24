@@ -21,7 +21,9 @@ protected:
     void wheelEvent(QWheelEvent* ev) /* override */;
 
 signals:
+    void viewMoved(double offset);
     void cursorMoved(double time);
+    void timeClicked(double time);
 
 public slots:
     void setCursor(double time);

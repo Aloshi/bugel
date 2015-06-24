@@ -29,6 +29,8 @@ TimelineContainer::TimelineContainer(QWidget *parent) :
                      mTimelineWidget, &TimelineWidget::setCursor);
     QObject::connect(mPlaybackWidget, &PlaybackWidget::durationChanged,
                      mTimelineWidget, &TimelineWidget::setLength);
+    QObject::connect(mTimelineWidget, &TimelineWidget::timeClicked,
+                     mPlaybackWidget, &PlaybackWidget::setPosition);
 
     mPlaybackWidget->setMedia(QUrl::fromLocalFile("/Users/Aloshi/Dropbox/Public/4.mp3"));
 }
