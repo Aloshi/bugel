@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     timelinecontainer.cpp \
     timelinewidget.cpp \
     playbackwidget.cpp \
-    util.cpp
+    util.cpp \
+    timelineeventswidget.cpp
 
 HEADERS  += mainwindow.h \
     timelinelayerwidget.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     timelinecontainer.h \
     timelinewidget.h \
     playbackwidget.h \
-    util.h
+    util.h \
+    timelineeventswidget.h
 
 FORMS    += mainwindow.ui \
     timelinelayerwidget.ui \

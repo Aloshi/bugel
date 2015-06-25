@@ -15,13 +15,17 @@ public:
 protected:
     bool inRange(double time);
 
+    int numSubTicks() const;
+    double intervalLength() const;
+    double pxPerSecond() const;
+
     void paintEvent(QPaintEvent* ev) /* override */;
     void mousePressEvent(QMouseEvent* ev) /* override */;
     // void mouseReleaseEvent(QMouseEvent* ev) /* override */;
     void wheelEvent(QWheelEvent* ev) /* override */;
 
 signals:
-    void viewMoved(double offset);
+    void viewportChanged(double startTime, double length);
     void cursorMoved(double time);
     void timeClicked(double time);
 
@@ -34,7 +38,7 @@ private:
 
     double mLength; // in seconds
     double mViewOffset; // in seconds
-    double mScale;
+    double mViewLength; // in seconds
 };
 
 #endif // TIMELINEWIDGET_H

@@ -55,7 +55,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QWidget" name="events" native="true">
+    <widget class="TimelineEventsWidget" name="events" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
@@ -72,6 +72,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TimelineEventsWidget</class>
+   <extends>QWidget</extends>
+   <header>timelineeventswidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -47,7 +47,12 @@ void TimelineContainer::createLayer()
 
 void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer> layer)
 {
-    QWidget* widget = new TimelineLayerWidget(layer);
+    TimelineLayerWidget* widget = new TimelineLayerWidget(layer);
+    QObject::connect(mTimelineWidget, &TimelineWidget::cursorMoved,
+                     widget, &TimelineLayerWidget::setCursor);
+    QObject::connect(mTimelineWidget, &TimelineWidget::viewportChanged,
+                     widget, &TimelineLayerWidget::setViewport);
+
     mLayerLayout->insertWidget(idx, widget);
 }
 

@@ -5,19 +5,21 @@
 #include <memory>
 #include <QAbstractItemModel>
 
-typedef unsigned int EventTime;
-
 class TimelineEvent
 {
 public:
+    TimelineEvent() : mTime(0) {}
+    TimelineEvent(double t) : mTime(t) {}
+    virtual ~TimelineEvent() {}
+
     inline bool operator<(const TimelineEvent& rhs) {
         return time() < rhs.time();
     }
 
-    inline EventTime time() const { return mTime; }
+    inline double time() const { return mTime; }
 
 private:
-    EventTime mTime;
+    double mTime;
 };
 
 
@@ -31,6 +33,8 @@ public:
     inline const QString& name() const { return mName; }
 
     void addEvent(const std::shared_ptr<TimelineEvent>& event);
+
+    QVector< std::shared_ptr<TimelineEvent> > eventsInRange(double start, double end);
 
 private:
     QString mName;

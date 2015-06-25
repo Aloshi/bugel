@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include <QApplication>
 #include <QDebug>
 
 TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
@@ -11,19 +12,31 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
 
     mLength = 60;
     mViewOffset = 0;
-    mScale = 1;
+    mViewLength = 120;
 }
 
 void TimelineWidget::wheelEvent(QWheelEvent* ev)
 {
-    mViewOffset += (int)(ev->delta() * -0.05f);
+    if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
+        // zoom
+        mViewLength += (int)(ev->delta() * -0.04);
+        mViewLength = std::max<double>(mViewLength, 5);
+    } else {
+        // scroll
+        // this should really snap to intervalLength()
+        double scrollAmt = (int)(ev->delta() * -0.00035 * size().width() / pxPerSecond());
+        if (scrollAmt < 1 && scrollAmt > -1)
+            scrollAmt = signbit((float)ev->delta()) ? 1 : -1;
+        mViewOffset += scrollAmt;
+    }
+
+    emit viewportChanged(mViewOffset, mViewLength);
     update();
 }
 
 void TimelineWidget::mousePressEvent(QMouseEvent* ev)
 {
-    // 80 / 15 should be pxPerSecond
-    double time = ev->x() / (80.0 / 15.0) + mViewOffset;
+    double time = ev->x() / pxPerSecond() + mViewOffset;
     emit timeClicked(time);
 }
 
@@ -40,22 +53,37 @@ void TimelineWidget::setLength(double length)
     update();
 }
 
+double TimelineWidget::intervalLength() const
+{
+    if (mViewLength >= 60)
+        return 15.0;
+    else if (mViewLength >= 15)
+        return 5.0;
+    else
+        return 1.0;
+}
+
+double TimelineWidget::pxPerSecond() const
+{
+    return size().width() / mViewLength;
+}
+
 void TimelineWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
 
-    const double interval = 15.0;
-    const int numSubTicks = (int)(interval / 5.0);
-    const double pxPerInterval = 80;
-    const double pxPerSecond = pxPerInterval / interval;
+    const int numSubTicks = (intervalLength() >= 15
+                       ? (int)(intervalLength() / 5.0)
+                       : (int)(intervalLength()));
+    const double pxPerInterval = pxPerSecond() * intervalLength();
 
     int curInterval; // in seconds
     if (mViewOffset >= 0)
-        curInterval = (int)(floor(mViewOffset / interval) * interval);
+        curInterval = (int)(floor(mViewOffset / intervalLength()) * intervalLength());
     else
-        curInterval = (int)(ceil(mViewOffset / interval) * interval);
+        curInterval = (int)(ceil(mViewOffset / intervalLength()) * intervalLength());
 
-    double remainder = (-fmod(mViewOffset, interval)) * pxPerSecond; // in px
+    double remainder = (-fmod(mViewOffset, intervalLength())) * pxPerSecond(); // in px
 
     static const QPen outOfRangePen(QColor(255, 0, 0));
     static const QPen inRangePen(QColor(0, 0, 0));
@@ -64,7 +92,7 @@ void TimelineWidget::paintEvent(QPaintEvent*)
     static const QBrush outOfRangeBrush(QColor(255, 0, 0));
 
     // start one interval early so we get subticks on the left
-    curInterval -= interval;
+    curInterval -= intervalLength();
     remainder -= pxPerInterval;
 
     // draw tick marks + text
@@ -98,12 +126,12 @@ void TimelineWidget::paintEvent(QPaintEvent*)
                                 (size().height() * bigTickHeightPerc) - 1), // height
                          inRange(curInterval) ? inRangeBrush : outOfRangeBrush);
 
-        curInterval += interval;
+        curInterval += intervalLength();
 
         // draw sub-ticks
         for (int j = 1; j < numSubTicks; j++) {
             const double subTickTime = curInterval -
-                    ((double)j / numSubTicks) * interval;
+                    ((double)j / numSubTicks) * intervalLength();
             const float left = i + j * ((float)1 / numSubTicks * pxPerInterval);
             static const float subTickHeightPerc = 0.2f;
             painter.fillRect(QRectF(left, size().height() * (1 - subTickHeightPerc),
@@ -113,7 +141,7 @@ void TimelineWidget::paintEvent(QPaintEvent*)
     }
 
     // draw cursor
-    painter.fillRect(QRectF(((mCursor - mViewOffset) * pxPerSecond) - 1, 0,
+    painter.fillRect(QRectF(((mCursor - mViewOffset) * pxPerSecond()) - 1, 0,
                             2, size().height()), QBrush(QColor(0, 0, 20)));
 }
 
