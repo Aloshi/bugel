@@ -1,9 +1,9 @@
 #ifndef TIMELINE
 #define TIMELINE
 
-#include <QVector>
 #include <memory>
-#include <QAbstractItemModel>
+#include <QVector>
+#include <QColor>
 
 class TimelineEvent
 {
@@ -18,11 +18,26 @@ public:
 
     inline double time() const { return mTime; }
 
+    virtual const char* name() const { return "TimelineEvent"; }
+    virtual int editorRow() const { return 0; }
+    virtual QColor editorColor() const { return QColor(255, 0, 0); }
+
 private:
     double mTime;
 };
 
 
+class EventList
+{
+public:
+    void addEvent(const std::shared_ptr<TimelineEvent>& event);
+    void removeEvent(const std::shared_ptr<TimelineEvent>& event);
+    void removeEventsInRange(double start, double end);
+    QVector< std::shared_ptr<TimelineEvent> > eventsInRange(double start, double end) const;
+
+private:
+    QVector< std::shared_ptr<TimelineEvent> > mEvents;
+};
 
 class TimelineLayer : public QObject
 {
@@ -30,18 +45,23 @@ class TimelineLayer : public QObject
 public:
     TimelineLayer(const QString& name = "Untitled");
 
+    // getters
     inline const QString& name() const { return mName; }
+    inline const QString& script() const { return mScript; }
+    inline const EventList& events() const { return mEvents; }
+    inline EventList& events() { return mEvents; }
 
-    void addEvent(const std::shared_ptr<TimelineEvent>& event);
+signals:
+    void scriptChanged(const QString& script);
 
-    QVector< std::shared_ptr<TimelineEvent> > eventsInRange(double start, double end);
+public slots:
+    void setScript(const QString& name);
 
 private:
     QString mName;
-    QVector< std::shared_ptr<TimelineEvent> > mEvents;
+    QString mScript;
+    EventList mEvents;
 };
-
-
 
 class Timeline : public QObject
 {

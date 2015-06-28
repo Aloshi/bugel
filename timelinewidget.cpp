@@ -12,7 +12,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
 
     mLength = 60;
     mViewOffset = 0;
-    mViewLength = 120;
+    mViewLength = 60;
 }
 
 void TimelineWidget::wheelEvent(QWheelEvent* ev)

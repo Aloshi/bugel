@@ -11,6 +11,8 @@ class TimelineLayerWidget;
 class TimelineLayer;
 class TimelineEventsWidget;
 class QLabel;
+class QComboBox;
+class QPushButton;
 
 class TimelineLayerWidget : public QWidget
 {
@@ -29,6 +31,10 @@ private:
 
     QLabel* mLblLayerName;
     TimelineEventsWidget* mEventsWidget;
+
+    QComboBox* mScriptBox;
+    QPushButton* mEditScriptButton;
+    QPushButton* mDeleteScriptButton;
 
     std::shared_ptr<TimelineLayer> mLayer;
 };

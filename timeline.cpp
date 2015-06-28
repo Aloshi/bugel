@@ -14,15 +14,21 @@ void Timeline::createLayer()
     emit layerAdded(mLayers.size() - 1, mLayers.last());
 }
 
+
+
 TimelineLayer::TimelineLayer(const QString& name)
     : mName(name)
 {
-    addEvent(std::make_shared<TimelineEvent>(5));
-
-    addEvent(std::make_shared<TimelineEvent>(15));
 }
 
-void TimelineLayer::addEvent(const std::shared_ptr<TimelineEvent>& event)
+void TimelineLayer::setScript(const QString& name)
+{
+    mScript = name;
+    emit scriptChanged(mScript);
+}
+
+
+void EventList::addEvent(const std::shared_ptr<TimelineEvent>& event)
 {
     mEvents.push_back(event);
     std::sort(mEvents.begin(), mEvents.end(),
@@ -31,7 +37,20 @@ void TimelineLayer::addEvent(const std::shared_ptr<TimelineEvent>& event)
     });
 }
 
-QVector< std::shared_ptr<TimelineEvent> > TimelineLayer::eventsInRange(double start, double end)
+void EventList::removeEvent(const std::shared_ptr<TimelineEvent>& event)
+{
+    mEvents.removeOne(event);
+}
+
+void EventList::removeEventsInRange(double start, double end)
+{
+    auto events = eventsInRange(start, end);
+    for (auto it = events.begin(); it != events.end(); it++) {
+        removeEvent(*it);
+    }
+}
+
+QVector< std::shared_ptr<TimelineEvent> > EventList::eventsInRange(double start, double end) const
 {
     QVector< std::shared_ptr<TimelineEvent> > ret;
     for (int i = 0; i < mEvents.size(); i++) {
