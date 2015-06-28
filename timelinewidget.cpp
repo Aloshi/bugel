@@ -32,12 +32,14 @@ void TimelineWidget::wheelEvent(QWheelEvent* ev)
 
     emit viewportChanged(mViewOffset, mViewLength);
     update();
+    ev->accept();
 }
 
 void TimelineWidget::mousePressEvent(QMouseEvent* ev)
 {
     double time = ev->x() / pxPerSecond() + mViewOffset;
     emit timeClicked(time);
+    ev->accept();
 }
 
 void TimelineWidget::setCursor(double time)

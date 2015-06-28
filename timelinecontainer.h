@@ -22,6 +22,9 @@ public:
     explicit TimelineContainer(QWidget *parent = 0);
     ~TimelineContainer();
 
+protected:
+    void wheelEvent(QWheelEvent* ev) /* override */;
+
 public slots:
     void createLayer();
 

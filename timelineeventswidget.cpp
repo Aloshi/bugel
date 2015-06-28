@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QShortcut>
 #include <QDebug>
 
 #include "timeline.h"
@@ -110,6 +111,10 @@ void TimelineEventsWidget::keyPressEvent(QKeyEvent* ev)
         int keyNum = ev->key() - Qt::Key_1;
         mEvents->addEvent(makeEvent(mCursor, keyNum));
         update();
+        ev->accept();
+    } else if (ev->key() == Qt::Key_Delete) {
+        deleteSelection();
+        ev->accept();
     }
 }
 
@@ -140,6 +145,7 @@ void TimelineEventsWidget::deleteSelection()
 {
     if (mSelection.state() == Selection::DONE) {
         mEvents->removeEventsInRange(mSelection.left(), mSelection.right());
+        update();
     }
 }
 

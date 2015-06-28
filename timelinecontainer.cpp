@@ -3,6 +3,7 @@
 
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QWheelEvent>
 
 #include "timelinelayerwidget.h"
 #include "timelinewidget.h"
@@ -59,4 +60,10 @@ void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer
 void TimelineContainer::removeLayerWidget(int idx)
 {
     mLayerLayout->removeWidget((QWidget*)mLayerLayout->children().at(idx));
+}
+
+// forward unused scroll events to mTimelineWidget
+void TimelineContainer::wheelEvent(QWheelEvent* ev)
+{
+    QApplication::sendEvent(mTimelineWidget, ev);
 }
