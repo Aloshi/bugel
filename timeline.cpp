@@ -35,11 +35,13 @@ void EventList::addEvent(const std::shared_ptr<TimelineEvent>& event)
               [](const std::shared_ptr<TimelineEvent>& e1, const std::shared_ptr<TimelineEvent>& e2) -> bool {
         return e1->time() < e2->time();
     });
+    emit eventAdded(event);
 }
 
 void EventList::removeEvent(const std::shared_ptr<TimelineEvent>& event)
 {
     mEvents.removeOne(event);
+    emit eventRemoved(event);
 }
 
 void EventList::removeEventsInRange(double start, double end)

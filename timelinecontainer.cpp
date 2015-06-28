@@ -15,6 +15,7 @@ TimelineContainer::TimelineContainer(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    mCurrentLayerIdx = -1;
     mPlaybackWidget = findChild<PlaybackWidget*>("playback_widget");
     mTimelineWidget = findChild<TimelineWidget*>("timeline_widget");
 
@@ -54,16 +55,79 @@ void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer
     QObject::connect(mTimelineWidget, &TimelineWidget::viewportChanged,
                      widget, &TimelineLayerWidget::setViewport);
 
+    QObject::connect(widget, &TimelineLayerWidget::focusGained,
+                     [this, idx] {
+        setCurrentLayerIdx(idx);
+    });
+    QObject::connect(widget, &TimelineLayerWidget::focusLost,
+                     [this, idx] {
+        if (mCurrentLayerIdx == idx)
+            setCurrentLayerIdx(-1);
+    });
+
+    QObject::connect(widget, &TimelineLayerWidget::selectionChanged,
+                     this, &TimelineContainer::currentSelectionChanged);
+
     mLayerLayout->insertWidget(idx, widget);
 }
 
 void TimelineContainer::removeLayerWidget(int idx)
 {
-    mLayerLayout->removeWidget((QWidget*)mLayerLayout->children().at(idx));
+    QLayoutItem* item = mLayerLayout->itemAt(idx);
+    mLayerLayout->removeItem(item);
+    delete item->widget();
 }
 
 // forward unused scroll events to mTimelineWidget
 void TimelineContainer::wheelEvent(QWheelEvent* ev)
 {
     QApplication::sendEvent(mTimelineWidget, ev);
+}
+
+double TimelineContainer::cursor() const
+{
+    return mTimelineWidget->cursor();
+}
+
+void TimelineContainer::setCurrentLayerIdx(int idx)
+{
+    mCurrentLayerIdx = idx;
+    emit currentLayerChanged(idx);
+    emit currentSelectionChanged(currentSelection());
+}
+
+const Selection& TimelineContainer::currentSelection() const
+{
+    if (mCurrentLayerIdx == -1) {
+        static const Selection emptySelection;
+        return emptySelection;
+    } else {
+        const TimelineLayerWidget* widget = (TimelineLayerWidget*)mLayerLayout->itemAt(mCurrentLayerIdx)->widget();
+        return widget->selection();
+    }
+}
+
+int TimelineContainer::currentLayerIdx() const
+{
+    return mCurrentLayerIdx;
+}
+
+std::shared_ptr<TimelineLayer> TimelineContainer::currentLayer()
+{
+    if (currentLayerIdx() == -1)
+        return nullptr;
+    return mTimeline.layer(currentLayerIdx());
+}
+
+void TimelineContainer::addEventToCurrentLayer(const std::shared_ptr<TimelineEvent> &event)
+{
+    if (currentLayer())
+        currentLayer()->events().addEvent(event);
+}
+
+void TimelineContainer::removeSelectionInCurrentLayer()
+{
+    auto selection = currentSelection();
+    if (currentLayer() && selection.state() == Selection::DONE)
+        currentLayer()->events().removeEventsInRange(selection.left(), selection.right());
 }

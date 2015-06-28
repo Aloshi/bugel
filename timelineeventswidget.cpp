@@ -23,7 +23,15 @@ TimelineEventsWidget::TimelineEventsWidget(QWidget *parent) : QWidget(parent)
 
 void TimelineEventsWidget::setEventSource(EventList* events)
 {
+    if (mEvents) {
+        mEvents->disconnect(this);
+    }
+
     mEvents = events;
+    QObject::connect(mEvents, SIGNAL(eventAdded(std::shared_ptr<TimelineEvent>)),
+                     this, SLOT(update()));
+    QObject::connect(mEvents, SIGNAL(eventRemoved(std::shared_ptr<TimelineEvent>)),
+                     this, SLOT(update()));
     update();
 }
 
@@ -57,10 +65,21 @@ float TimelineEventsWidget::pxAtTime(double time) const
 
 void TimelineEventsWidget::focusInEvent(QFocusEvent* ev)
 {
-    if (ev->reason() == Qt::MouseFocusReason) {
+    // if we already have a selection and are just clicking to
+    // give focus, ignore the next click so we don't unselect
+    if (ev->reason() == Qt::MouseFocusReason && mSelection.state() == Selection::DONE) {
         mIgnoreNextClick = true;
     }
     QWidget::focusInEvent(ev);
+    if (hasFocus())
+        emit focusGained();
+}
+
+void TimelineEventsWidget::focusOutEvent(QFocusEvent* ev)
+{
+    QWidget::focusOutEvent(ev);
+    if (!hasFocus())
+        emit focusLost();
 }
 
 void TimelineEventsWidget::mousePressEvent(QMouseEvent* ev)
@@ -100,24 +119,13 @@ void TimelineEventsWidget::mouseReleaseEvent(QMouseEvent* ev)
         if (mSelection.length() < 1.0 / pxPerSecond())
             mSelection.reset();
 
+        emit selectionChanged(mSelection);
         update();
         ev->accept();
     }
 }
 
-void TimelineEventsWidget::keyPressEvent(QKeyEvent* ev)
-{
-    if (ev->key() >= Qt::Key_1 && ev->key() <= Qt::Key_9) {
-        int keyNum = ev->key() - Qt::Key_1;
-        mEvents->addEvent(makeEvent(mCursor, keyNum));
-        update();
-        ev->accept();
-    } else if (ev->key() == Qt::Key_Delete) {
-        deleteSelection();
-        ev->accept();
-    }
-}
-
+/*
 void TimelineEventsWidget::contextMenuEvent(QContextMenuEvent* ev)
 {
     QRectF selectionRect(pxAtTime(mSelection.left()), 0,
@@ -134,20 +142,7 @@ void TimelineEventsWidget::contextMenuEvent(QContextMenuEvent* ev)
 
     menu.exec(ev->globalPos());
     ev->accept();
-}
-
-std::shared_ptr<TimelineEvent> TimelineEventsWidget::makeEvent(double time, int keyNum) const
-{
-    return std::make_shared<NoteEvent>(time, keyNum);
-}
-
-void TimelineEventsWidget::deleteSelection()
-{
-    if (mSelection.state() == Selection::DONE) {
-        mEvents->removeEventsInRange(mSelection.left(), mSelection.right());
-        update();
-    }
-}
+}*/
 
 void TimelineEventsWidget::paintEvent(QPaintEvent*)
 {

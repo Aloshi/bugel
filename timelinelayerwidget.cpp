@@ -33,6 +33,13 @@ TimelineLayerWidget::TimelineLayerWidget(const std::shared_ptr<TimelineLayer>& l
                      mScriptBox, &QComboBox::setCurrentText);
     QObject::connect(mScriptBox, SIGNAL(currentIndexChanged(const QString&)),
                      mLayer.get(), SLOT(setScript(const QString&)));
+
+    QObject::connect(mEventsWidget, &TimelineEventsWidget::focusGained,
+                     this, &TimelineLayerWidget::focusGained);
+    QObject::connect(mEventsWidget, &TimelineEventsWidget::focusLost,
+                     this, &TimelineLayerWidget::focusLost);
+    QObject::connect(mEventsWidget, &TimelineEventsWidget::selectionChanged,
+                     this, &TimelineLayerWidget::selectionChanged);
 }
 
 TimelineLayerWidget::~TimelineLayerWidget()
@@ -48,4 +55,9 @@ void TimelineLayerWidget::setViewport(double startTime, double length)
 void TimelineLayerWidget::setCursor(double time)
 {
     mEventsWidget->setCursor(time);
+}
+
+const Selection& TimelineLayerWidget::selection() const
+{
+    return mEventsWidget->selection();
 }

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <memory>
+#include "selection.h"
 
 namespace Ui {
 class TimelineLayerWidget;
@@ -21,6 +22,13 @@ class TimelineLayerWidget : public QWidget
 public:
     explicit TimelineLayerWidget(const std::shared_ptr<TimelineLayer>& layer, QWidget *parent = 0);
     ~TimelineLayerWidget();
+
+    const Selection& selection() const;
+
+signals:
+    void selectionChanged(const Selection& selection);
+    void focusGained();
+    void focusLost();
 
 public slots:
     void setViewport(double startTime, double length);

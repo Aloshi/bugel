@@ -33,7 +33,8 @@ HEADERS  += mainwindow.h \
     playbackwidget.h \
     util.h \
     timelineeventswidget.h \
-    noteevent.h
+    noteevent.h \
+    selection.h
 
 FORMS    += mainwindow.ui \
     timelinelayerwidget.ui \

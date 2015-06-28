@@ -7,6 +7,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class TimelineContainer;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -17,6 +19,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
+    QMenu* mLayerMenu;
+    TimelineContainer* mTimelineContainer;
 };
 
 #endif // MAINWINDOW_H
