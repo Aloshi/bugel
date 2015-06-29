@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     playbackwidget.cpp \
     util.cpp \
     timelineeventswidget.cpp \
-    noteevent.cpp
+    timelinesettingsdialog.cpp \
+    placeholderevent.cpp
 
 HEADERS  += mainwindow.h \
     timelinelayerwidget.h \
@@ -33,11 +34,13 @@ HEADERS  += mainwindow.h \
     playbackwidget.h \
     util.h \
     timelineeventswidget.h \
-    noteevent.h \
-    selection.h
+    selection.h \
+    timelinesettingsdialog.h \
+    placeholderevent.h
 
 FORMS    += mainwindow.ui \
     timelinelayerwidget.ui \
     timelinecontainer.ui \
-    playbackwidget.ui
+    playbackwidget.ui \
+    timelinesettingsdialog.ui
 

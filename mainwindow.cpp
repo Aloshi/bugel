@@ -1,8 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "noteevent.h"
+#include "placeholderevent.h"
+#include "timelinesettingsdialog.h"
 
+#include <QFileDialog>
 #include <QShortcut>
 #include <QDebug>
 
@@ -34,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QAction* action = placeholders.at(i);
         QObject::connect(action, &QAction::triggered,
                          [this, i] {
-            auto event = std::make_shared<NoteEvent>(mTimelineContainer->cursor(), i);
+            auto event = std::make_shared<PlaceholderEvent>(mTimelineContainer->cursor(), i);
             mTimelineContainer->addEventToCurrentLayer(event);
         });
 
@@ -67,13 +69,43 @@ MainWindow::MainWindow(QWidget *parent) :
         }
         deleteSelectionAction->setEnabled(selection.state() == Selection::DONE);
     });
-
-    QObject::connect(deleteSelectionAction, &QAction::triggered,
-                     mTimelineContainer, &TimelineContainer::removeSelectionInCurrentLayer);
-    deleteSelectionAction->setShortcut(QKeySequence(Qt::Key_Delete));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::openTimelineSettingsDialog()
+{
+    TimelineSettingsDialog dlg;
+    dlg.init(*mTimelineContainer->timeline());
+    if (dlg.exec() == QDialog::Accepted) {
+        dlg.apply(*mTimelineContainer->timeline());
+    }
+}
+
+void MainWindow::open()
+{
+    QString openPath = QFileDialog::getOpenFileName(this, "Open Timeline", "", "Bugel Timeline (*.bgl)");
+    if (!openPath.isEmpty()) {
+        mTimelineContainer->timeline()->load(openPath);
+    }
+}
+
+void MainWindow::save()
+{
+    if (mSavePath.isEmpty()) {
+        saveAs();
+    } else {
+        mTimelineContainer->timeline()->save(mSavePath);
+        statusBar()->showMessage(QString("Saved to %1.").arg(mSavePath));
+    }
+}
+
+void MainWindow::saveAs()
+{
+    mSavePath = QFileDialog::getSaveFileName(this, "Save Timeline As", "", "Bugel Timeline (*.bgl)");
+    if (!mSavePath.isEmpty())
+        save();
 }

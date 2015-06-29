@@ -14,6 +14,7 @@ class QScrollArea;
 class QVBoxLayout;
 class TimelineWidget;
 class PlaybackWidget;
+class QMediaContent;
 
 // controller and view container
 class TimelineContainer : public QWidget
@@ -25,6 +26,7 @@ public:
     ~TimelineContainer();
 
     double cursor() const;
+    inline Timeline* timeline() { return &mTimeline; }
 
 protected:
     void wheelEvent(QWheelEvent* ev) /* override */;
@@ -35,7 +37,7 @@ signals:
 
 public slots:
     void createLayer();
-    //void removeCurrentLayer();
+    void removeCurrentLayer();
     void addEventToCurrentLayer(const std::shared_ptr<TimelineEvent>& event);
     void removeSelectionInCurrentLayer();
 

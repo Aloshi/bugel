@@ -7,7 +7,7 @@
 #include <QDebug>
 
 #include "timeline.h"
-#include "noteevent.h"
+#include "placeholderevent.h"
 
 TimelineEventsWidget::TimelineEventsWidget(QWidget *parent) : QWidget(parent)
 {

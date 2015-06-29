@@ -26,6 +26,8 @@ TimelineContainer::TimelineContainer(QWidget *parent) :
                      this, &TimelineContainer::insertLayerWidget);
     QObject::connect(&mTimeline, &Timeline::layerRemoved,
                      this, &TimelineContainer::removeLayerWidget);
+    QObject::connect(&mTimeline, SIGNAL(backingTrackChanged(QString)),
+                     mPlaybackWidget, SLOT(setMedia(QString)));
 
     QObject::connect(mPlaybackWidget, &PlaybackWidget::positionChanged,
                      mTimelineWidget, &TimelineWidget::setCursor);
@@ -33,8 +35,6 @@ TimelineContainer::TimelineContainer(QWidget *parent) :
                      mTimelineWidget, &TimelineWidget::setLength);
     QObject::connect(mTimelineWidget, &TimelineWidget::timeClicked,
                      mPlaybackWidget, &PlaybackWidget::setPosition);
-
-    mPlaybackWidget->setMedia(QUrl::fromLocalFile("/Users/Aloshi/Dropbox/Public/4.mp3"));
 }
 
 TimelineContainer::~TimelineContainer()
@@ -47,6 +47,14 @@ void TimelineContainer::createLayer()
     mTimeline.createLayer();
 }
 
+void TimelineContainer::removeCurrentLayer()
+{
+    if (currentLayerIdx() != -1) {
+        mTimeline.removeLayer(currentLayerIdx());
+        mCurrentLayerIdx = -1;
+    }
+}
+
 void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer> layer)
 {
     TimelineLayerWidget* widget = new TimelineLayerWidget(layer);
@@ -56,12 +64,12 @@ void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer
                      widget, &TimelineLayerWidget::setViewport);
 
     QObject::connect(widget, &TimelineLayerWidget::focusGained,
-                     [this, idx] {
-        setCurrentLayerIdx(idx);
+                     [this, widget] {
+        setCurrentLayerIdx(mLayerLayout->indexOf(widget));
     });
     QObject::connect(widget, &TimelineLayerWidget::focusLost,
-                     [this, idx] {
-        if (mCurrentLayerIdx == idx)
+                     [this, widget] {
+        if (mLayerLayout->indexOf(widget) == mCurrentLayerIdx)
             setCurrentLayerIdx(-1);
     });
 

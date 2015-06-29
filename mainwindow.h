@@ -17,11 +17,18 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void openTimelineSettingsDialog();
+    void open();
+    void save();
+    void saveAs();
+
 private:
     Ui::MainWindow *ui;
 
     QMenu* mLayerMenu;
     TimelineContainer* mTimelineContainer;
+    QString mSavePath;
 };
 
 #endif // MAINWINDOW_H

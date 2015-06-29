@@ -5,6 +5,9 @@
 #include <QVector>
 #include <QColor>
 
+class QXmlStreamReader;
+class QXmlStreamWriter;
+
 class TimelineEvent
 {
 public:
@@ -18,9 +21,16 @@ public:
 
     inline double time() const { return mTime; }
 
-    virtual const char* name() const { return "TimelineEvent"; }
+    virtual const char* type() const = 0;
     virtual int editorRow() const { return 0; }
     virtual QColor editorColor() const { return QColor(255, 0, 0); }
+
+    QJsonObject toJSON() const;
+    static std::shared_ptr<TimelineEvent> createFromJSON(const QJsonObject& ev);
+
+protected:
+    virtual void writeParametersJSON(QJsonObject& ev) const = 0;
+    virtual void readParametersJSON(const QJsonObject&) = 0;
 
 private:
     double mTime;
@@ -35,6 +45,9 @@ public:
     void removeEvent(const std::shared_ptr<TimelineEvent>& event);
     void removeEventsInRange(double start, double end);
     QVector< std::shared_ptr<TimelineEvent> > eventsInRange(double start, double end) const;
+
+    QJsonArray toJSON() const;
+    void fromJSON(const QJsonArray& events);
 
 signals:
     void eventAdded(const std::shared_ptr<TimelineEvent>& event);
@@ -56,11 +69,16 @@ public:
     inline const EventList& events() const { return mEvents; }
     inline EventList& events() { return mEvents; }
 
+    QJsonObject toJSON() const;
+    void fromJSON(const QJsonObject& layer);
+
 signals:
+    void nameChanged(const QString& name);
     void scriptChanged(const QString& script);
 
 public slots:
-    void setScript(const QString& name);
+    void setName(const QString& name);
+    void setScript(const QString& script);
 
 private:
     QString mName;
@@ -74,17 +92,33 @@ class Timeline : public QObject
 
 public:
     Timeline();
-    void createLayer();
 
+    std::shared_ptr<TimelineLayer> createLayer();
+    void removeLayer(int idx);
+    void clearLayers();
+
+    void setBackingTrack(const QString& path);
+    void setBPM(double bpm);
+
+    // getters
+    inline const QString& backingTrack() const { return mBackingTrack; }
+    inline double bpm() const { return mBPM; }
     inline std::shared_ptr<TimelineLayer> layer(int idx) { return mLayers.at(idx); }
+
+    void load(const QString& path);
+    void save(const QString& path) const;
 
 signals:
     void layerAdded(int idx, std::shared_ptr<TimelineLayer> layer);
     void layerRemoved(int idx);
 
+    void backingTrackChanged(const QString& track);
+    void bpmChanged(double bpm);
+
 private:
+    QString mBackingTrack;
+    double mBPM;
     QVector< std::shared_ptr<TimelineLayer> > mLayers;
 };
 
 #endif // TIMELINE
-

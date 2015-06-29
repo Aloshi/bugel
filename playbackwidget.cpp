@@ -18,11 +18,9 @@ PlaybackWidget::PlaybackWidget(QWidget *parent) :
 
     QObject::connect(&mMediaPlayer, &QMediaPlayer::positionChanged,
                      this, &PlaybackWidget::mediaPlayerPositionChanged);
-
-//    QObject::connect(&mMediaPlayer, &QMediaPlayer::mediaChanged,
-//                     this, &PlaybackWidget::mediaChanged);
     QObject::connect(&mMediaPlayer, &QMediaPlayer::durationChanged,
                      this, &PlaybackWidget::mediaPlayerDurationChanged);
+
 
     mMediaPlayer.setNotifyInterval(0);
 }
@@ -61,4 +59,9 @@ void PlaybackWidget::mediaPlayerPositionChanged(qint64 ms)
 void PlaybackWidget::mediaPlayerDurationChanged(qint64 ms)
 {
     emit durationChanged(ms / 1000.0);
+}
+
+void PlaybackWidget::setMedia(const QString &str)
+{
+    setMedia(QMediaContent(QUrl(str)));
 }

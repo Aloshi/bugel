@@ -24,6 +24,7 @@ signals:
 
 public slots:
     void setMedia(const QMediaContent& media);
+    void setMedia(const QString& str);
     void setPosition(double time);
 
     void togglePlaying();
