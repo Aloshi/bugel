@@ -300,11 +300,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionExport</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>exportAs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openTimelineSettingsDialog()</slot>
   <slot>save()</slot>
   <slot>saveAs()</slot>
   <slot>open()</slot>
+  <slot>exportAs()</slot>
  </slots>
 </ui>

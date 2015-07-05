@@ -7,7 +7,7 @@
 #include <QDebug>
 
 #include "timeline.h"
-#include "placeholderevent.h"
+#include "timelineevent.h"
 
 TimelineEventsWidget::TimelineEventsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -164,9 +164,11 @@ void TimelineEventsWidget::paintEvent(QPaintEvent*)
 
         const float width = 8;
         const float height = 8;
+        const int editorRow = 0;
+        const QColor color = QColor(255, 0, 0);
         const float x = pxAtTime(event->time()) - (width / 2.0f);
-        const float y = event->editorRow() * ((size().height() - height) / 10);
-        painter.fillRect(QRectF(x, y, width, height), QBrush(event->editorColor()));
+        const float y = editorRow * ((size().height() - height) / 10);
+        painter.fillRect(QRectF(x, y, width, height), QBrush(color));
     }
 
 

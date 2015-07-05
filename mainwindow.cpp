@@ -1,12 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "placeholderevent.h"
 #include "timelinesettingsdialog.h"
 
 #include <QFileDialog>
 #include <QShortcut>
 #include <QDebug>
+#include <QMessageBox>
+
+#include "placeholderevent.h"
 
 QAction* getAction(QMenu* menu, const QString& name)
 {
@@ -109,3 +111,13 @@ void MainWindow::saveAs()
     if (!mSavePath.isEmpty())
         save();
 }
+
+void MainWindow::exportAs()
+{
+    QString exportPath = QFileDialog::getSaveFileName(this, "Export Timeline As", "", "JSON (*.json)");
+    if (!exportPath.isEmpty()) {
+        std::shared_ptr<Timeline> exportTimeline = mTimelineContainer->timeline()->process();
+        exportTimeline->save(exportPath);
+    }
+}
+

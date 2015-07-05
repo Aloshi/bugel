@@ -23,6 +23,8 @@ private slots:
     void save();
     void saveAs();
 
+    void exportAs();
+
 private:
     Ui::MainWindow *ui;
 

@@ -24,6 +24,11 @@ SOURCES += main.cpp\
     util.cpp \
     timelineeventswidget.cpp \
     timelinesettingsdialog.cpp \
+    luascriptcontext.cpp \
+    timelineevent.cpp \
+    timelinelayer.cpp \
+    eventlist.cpp \
+    bugelexception.cpp \
     placeholderevent.cpp
 
 HEADERS  += mainwindow.h \
@@ -36,6 +41,11 @@ HEADERS  += mainwindow.h \
     timelineeventswidget.h \
     selection.h \
     timelinesettingsdialog.h \
+    luascriptcontext.h \
+    timelineevent.h \
+    timelinelayer.h \
+    eventlist.h \
+    bugelexception.h \
     placeholderevent.h
 
 FORMS    += mainwindow.ui \
@@ -44,3 +54,9 @@ FORMS    += mainwindow.ui \
     playbackwidget.ui \
     timelinesettingsdialog.ui
 
+INCLUDEPATH += C:/libraries/cpp/lua-5.2.3_Win32_dllw4_lib/include
+LIBS += C:/libraries/cpp/lua-5.2.3_Win32_dllw4_lib/liblua52.a
+
+INCLUDEPATH += C:/libraries/cpp/LuaState/include
+
+QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS

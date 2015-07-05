@@ -6,7 +6,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "placeholderevent.h"
+#include "luascriptcontext.h"
 
 Timeline::Timeline()
     : mBPM(120)
@@ -92,117 +92,21 @@ void Timeline::save(const QString& path) const
     file.close();
 }
 
-
-TimelineLayer::TimelineLayer(const QString& name)
-    : mName(name)
+std::shared_ptr<Timeline> Timeline::process() const
 {
-}
+    std::shared_ptr<Timeline> timeline = std::make_shared<Timeline>();
 
-void TimelineLayer::setName(const QString& name)
-{
-    mName = name;
-    emit nameChanged(mName);
-}
+    // copy timeline values
+    timeline->setBackingTrack(backingTrack());
+    timeline->setBPM(bpm());
 
-void TimelineLayer::setScript(const QString& name)
-{
-    mScript = name;
-    emit scriptChanged(mScript);
-}
+    for (auto sourceLayer = mLayers.begin(); sourceLayer != mLayers.end(); sourceLayer++) {
+        std::shared_ptr<TimelineLayer> newLayer = timeline->createLayer();
+        newLayer->setName(sourceLayer->get()->name());
 
-QJsonObject TimelineLayer::toJSON() const
-{
-    QJsonObject layer;
-    layer["name"] = name();
-    layer["script"] = script();
-    layer["events"] = mEvents.toJSON();
-    return layer;
-}
-
-void TimelineLayer::fromJSON(const QJsonObject &layer)
-{
-    setName(layer["name"].toString());
-    setScript(layer["script"].toString());
-    mEvents.fromJSON(layer["events"].toArray());
-}
-
-
-void EventList::addEvent(const std::shared_ptr<TimelineEvent>& event)
-{
-    Q_ASSERT(event != nullptr);
-    mEvents.push_back(event);
-    std::sort(mEvents.begin(), mEvents.end(),
-              [](const std::shared_ptr<TimelineEvent>& e1, const std::shared_ptr<TimelineEvent>& e2) -> bool {
-        return e1->time() < e2->time();
-    });
-    emit eventAdded(event);
-}
-
-void EventList::removeEvent(const std::shared_ptr<TimelineEvent>& event)
-{
-    mEvents.removeOne(event);
-    emit eventRemoved(event);
-}
-
-void EventList::removeEventsInRange(double start, double end)
-{
-    auto events = eventsInRange(start, end);
-    for (auto it = events.begin(); it != events.end(); it++) {
-        removeEvent(*it);
-    }
-}
-
-QVector< std::shared_ptr<TimelineEvent> > EventList::eventsInRange(double start, double end) const
-{
-    QVector< std::shared_ptr<TimelineEvent> > ret;
-    for (int i = 0; i < mEvents.size(); i++) {
-        if (mEvents[i]->time() >= end)
-            break;
-        if (mEvents[i]->time() >= start)
-            ret.push_back(mEvents[i]);
-    }
-    return ret;
-}
-
-QJsonArray EventList::toJSON() const
-{
-    QJsonArray events;
-    for (auto it = mEvents.begin(); it != mEvents.end(); it++) {
-        events.append(it->get()->toJSON());
-    }
-    return events;
-}
-
-void EventList::fromJSON(const QJsonArray& events)
-{
-    for (auto it = events.begin(); it != events.end(); it++) {
-        addEvent(TimelineEvent::createFromJSON((*it).toObject()));
-    }
-}
-
-
-QJsonObject TimelineEvent::toJSON() const
-{
-    QJsonObject event;
-    event["type"] = type();
-    event["time"] = time();
-    writeParametersJSON(event);
-    return event;
-}
-
-std::shared_ptr<TimelineEvent> TimelineEvent::createFromJSON(const QJsonObject& event)
-{
-    std::shared_ptr<TimelineEvent> ev;
-    QString type = event["type"].toString();
-    if (type == "placeholder") {
-        ev = std::make_shared<PlaceholderEvent>();
-    } else {
-        qDebug() << "Unknown event type " << type;
-        qDebug() << event;
-        return nullptr;
+        LuaScriptContext script(sourceLayer->get()->script());
+        script.process(sourceLayer->get(), newLayer.get());
     }
 
-    ev->mTime = event["time"].toDouble();
-    ev->readParametersJSON(event);
-    return ev;
+    return timeline;
 }
