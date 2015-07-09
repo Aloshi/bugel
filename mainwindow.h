@@ -19,6 +19,7 @@ public:
 
 private slots:
     void openTimelineSettingsDialog();
+    void openProjectSettingsDialog();
     void open();
     void save();
     void saveAs();

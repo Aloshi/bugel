@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 
 #include "timelinesettingsdialog.h"
+#include "projectsettingsdialog.h"
+#include "project.h"
 
 #include <QFileDialog>
 #include <QShortcut>
@@ -121,3 +123,10 @@ void MainWindow::exportAs()
     }
 }
 
+void MainWindow::openProjectSettingsDialog()
+{
+    ProjectSettingsDialog dlg(Project::get());
+    if (dlg.exec() == QDialog::Accepted) {
+        dlg.apply(Project::get());
+    }
+}

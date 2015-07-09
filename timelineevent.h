@@ -27,7 +27,7 @@ struct EventType
     QMap<QString, EventProperty> properties;
 
     EventType() {}
-    EventType(const std::string& n, QMap<QString, EventProperty> props)
+    EventType(const std::string& n, QMap<QString, EventProperty> props = QMap<QString, EventProperty>())
         : name(n), properties(props) {}
 };
 

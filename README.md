@@ -34,4 +34,5 @@ TODO
 * Undo/redo
 * Add tooltip properties display to TimelineEventsWidget
 * Event type creator GUI
+* Remove type and time arguments from addEvent, make it just one table
 * A way to pass arguments from GUI to script

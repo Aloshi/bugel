@@ -29,7 +29,10 @@ SOURCES += main.cpp\
     timelinelayer.cpp \
     eventlist.cpp \
     bugelexception.cpp \
-    placeholderevent.cpp
+    placeholderevent.cpp \
+    project.cpp \
+    projectsettingsdialog.cpp \
+    eventtypemodel.cpp
 
 HEADERS  += mainwindow.h \
     timelinelayerwidget.h \
@@ -46,13 +49,17 @@ HEADERS  += mainwindow.h \
     timelinelayer.h \
     eventlist.h \
     bugelexception.h \
-    placeholderevent.h
+    placeholderevent.h \
+    project.h \
+    projectsettingsdialog.h \
+    eventtypemodel.h
 
 FORMS    += mainwindow.ui \
     timelinelayerwidget.ui \
     timelinecontainer.ui \
     playbackwidget.ui \
-    timelinesettingsdialog.ui
+    timelinesettingsdialog.ui \
+    projectsettingsdialog.ui
 
 INCLUDEPATH += C:/libraries/cpp/lua-5.2.3_Win32_dllw4_lib/include
 LIBS += C:/libraries/cpp/lua-5.2.3_Win32_dllw4_lib/liblua52.a
