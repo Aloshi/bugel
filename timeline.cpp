@@ -45,51 +45,33 @@ void Timeline::setBackingTrack(const QString& track)
     emit backingTrackChanged(track);
 }
 
-void Timeline::load(const QString& path)
+QJsonObject Timeline::toJSON() const
 {
-    QFile file(path);
-    file.open(QIODevice::ReadOnly);
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-
-    QJsonObject timeline = doc.object();
-
-    // backing track
-    QJsonObject backingTrack = timeline["backingTrack"].toObject();
-    setBackingTrack(backingTrack["path"].toString());
-    setBPM(backingTrack["bpm"].toDouble());
-
-    // layers
-    clearLayers();
-    QJsonArray layers = timeline["layers"].toArray();
-    for (auto it = layers.begin(); it != layers.end(); it++) {
-        createLayer()->fromJSON((*it).toObject());
-    }
-}
-
-void Timeline::save(const QString& path) const
-{
-    QJsonObject timeline;
-
-    // backing track
-    QJsonObject backingTrack;
-    backingTrack["path"] = mBackingTrack;
-    backingTrack["bpm"] = mBPM;
-    timeline["backingTrack"] = backingTrack;
-
     // layers
     QJsonArray layers;
     for (auto layer = mLayers.begin(); layer != mLayers.end(); layer++) {
         layers.append(layer->get()->toJSON());
     }
-    timeline["layers"] = layers;
 
-    // save document
-    QJsonDocument doc(timeline);
-    QFile file(path);
-    file.open(QIODevice::WriteOnly);
-    file.write(doc.toJson());
-    file.close();
+    QJsonObject timeline;
+    timeline["backingTrack"] = mBackingTrack;
+    timeline["bpm"] = mBPM;
+    timeline["layers"] = layers;
+    return timeline;
+}
+
+void Timeline::fromJSON(const QJsonObject& timeline)
+{
+    // backing track
+    setBackingTrack(timeline["backingTrack"].toString());
+    setBPM(timeline["bpm"].toDouble());
+
+    // layers
+    clearLayers();
+    const QJsonArray& layers = timeline["layers"].toArray();
+    for (auto it = layers.begin(); it != layers.end(); it++) {
+        createLayer()->fromJSON((*it).toObject());
+    }
 }
 
 std::shared_ptr<Timeline> Timeline::process() const

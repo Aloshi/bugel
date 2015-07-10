@@ -26,7 +26,9 @@ public:
     ~TimelineContainer();
 
     double cursor() const;
-    inline Timeline* timeline() { return &mTimeline; }
+    inline std::shared_ptr<Timeline> timeline() { return mTimeline; }
+
+    void setTimeline(const std::shared_ptr<Timeline>& timeline);
 
 protected:
     void wheelEvent(QWheelEvent* ev) /* override */;
@@ -59,7 +61,7 @@ private:
     TimelineWidget* mTimelineWidget;
 
     int mCurrentLayerIdx;
-    Timeline mTimeline;
+    std::shared_ptr<Timeline> mTimeline;
 };
 
 #endif // TIMELINECONTAINER_H

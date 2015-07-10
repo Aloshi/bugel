@@ -29,6 +29,9 @@ struct EventType
     EventType() {}
     EventType(const std::string& n, QMap<QString, EventProperty> props = QMap<QString, EventProperty>())
         : name(n), properties(props) {}
+
+    QJsonObject toJSON() const;
+    void fromJSON(const QJsonObject& type);
 };
 
 class TimelineEvent
@@ -51,15 +54,15 @@ public:
     T getProperty(const QString& name) {
         auto it = mProperties.find(name);
         if (it == mProperties.end())
-            throw PropertyException() << "Property " << name << " does not exist for event type " << mType->name();
+            throw EventException() << "Property " << name << " does not exist for event type " << mType->name;
         if (!it->canConvert<T>())
-            throw PropertyException() << "Cannot convert property " << name << " of " << mType->name();
+            throw EventException() << "Cannot convert property " << name << " of " << mType->name;
         return it->value<T>();
     }
 
     inline const QMap<QString, QVariant>& properties() const { return mProperties; }
 
-    inline const char* type() const { return mType->name.c_str(); }
+    inline const char* typeName() const { return mType->name.c_str(); }
 
     // saving/loading
     QJsonObject toJSON() const;

@@ -164,8 +164,26 @@ void TimelineEventsWidget::paintEvent(QPaintEvent*)
 
         const float width = 8;
         const float height = 8;
-        const int editorRow = 0;
-        const QColor color = QColor(255, 0, 0);
+
+        const int editorRow = (strcmp(event->typeName(), "placeholder") == 0)
+                ? event->getProperty<int>("note")
+                : 0;
+
+        QColor color;
+        switch (editorRow) {
+        case 0: color = QColor(255, 0, 0); break;
+        case 1: color = QColor(0, 255, 0); break;
+        case 2: color = QColor(0, 0, 255); break;
+        case 3: color = QColor(255, 255, 0); break;
+        case 4: color = QColor(255, 0, 255); break;
+        case 5: color = QColor(0, 255, 255); break;
+        case 6: color = QColor(255, 255, 255); break;
+        case 7: color = QColor(255, 128, 0); break;
+        case 8: color = QColor(255, 0, 128); break;
+        case 9: color = QColor(76, 128, 76); break;
+        default: color = QColor(255, 0, 0); break;
+        }
+
         const float x = pxAtTime(event->time()) - (width / 2.0f);
         const float y = editorRow * ((size().height() - height) / 10);
         painter.fillRect(QRectF(x, y, width, height), QBrush(color));

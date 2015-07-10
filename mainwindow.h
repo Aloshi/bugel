@@ -18,13 +18,13 @@ public:
     ~MainWindow();
 
 private slots:
-    void openTimelineSettingsDialog();
+    void openProject();
     void openProjectSettingsDialog();
-    void open();
-    void save();
-    void saveAs();
+    void saveProject();
+    void saveProjectAs();
 
-    void exportAs();
+    void openTimelineSettingsDialog();
+    void exportTimelineAs();
 
 private:
     Ui::MainWindow *ui;

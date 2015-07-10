@@ -171,7 +171,7 @@ void LuaScriptContext::process(const TimelineLayer* sourceLayer, TimelineLayer* 
         lua_newtable(state);
 
         // event["type"] = ev->type()
-        lua_pushstring(state, it->get()->type());
+        lua_pushstring(state, it->get()->typeName());
         lua_setfield(state, -2, "type");
 
         // event["time"] = ev->time();

@@ -24,10 +24,12 @@ public:
     // getters
     inline const QString& backingTrack() const { return mBackingTrack; }
     inline double bpm() const { return mBPM; }
+
+    inline const QVector< std::shared_ptr<TimelineLayer> >& layers() const { return mLayers; }
     inline std::shared_ptr<TimelineLayer> layer(int idx) { return mLayers.at(idx); }
 
-    void load(const QString& path);
-    void save(const QString& path) const;
+    QJsonObject toJSON() const;
+    void fromJSON(const QJsonObject& timeline);
 
     std::shared_ptr<Timeline> process() const;
 

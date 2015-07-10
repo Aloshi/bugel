@@ -22,13 +22,6 @@ TimelineContainer::TimelineContainer(QWidget *parent) :
     mLayerScrollArea = findChild<QScrollArea*>("scroll_layers");
     mLayerLayout = dynamic_cast<QVBoxLayout*>(mLayerScrollArea->widget()->layout());
 
-    QObject::connect(&mTimeline, &Timeline::layerAdded,
-                     this, &TimelineContainer::insertLayerWidget);
-    QObject::connect(&mTimeline, &Timeline::layerRemoved,
-                     this, &TimelineContainer::removeLayerWidget);
-    QObject::connect(&mTimeline, SIGNAL(backingTrackChanged(QString)),
-                     mPlaybackWidget, SLOT(setMedia(QString)));
-
     QObject::connect(mPlaybackWidget, &PlaybackWidget::positionChanged,
                      mTimelineWidget, &TimelineWidget::setCursor);
     QObject::connect(mPlaybackWidget, &PlaybackWidget::durationChanged,
@@ -42,15 +35,44 @@ TimelineContainer::~TimelineContainer()
     delete ui;
 }
 
+void TimelineContainer::setTimeline(const std::shared_ptr<Timeline>& timeline)
+{
+    if (mTimeline)
+        mTimeline->disconnect(this);
+
+    mTimeline = timeline;
+
+    // clear existing timeline layer widgets
+    while (mLayerLayout->count())
+        mLayerLayout->takeAt(0)->widget()->deleteLater();
+
+    if (mTimeline) {
+        QObject::connect(mTimeline.get(), &Timeline::layerAdded,
+                         this, &TimelineContainer::insertLayerWidget);
+        QObject::connect(mTimeline.get(), &Timeline::layerRemoved,
+                         this, &TimelineContainer::removeLayerWidget);
+        QObject::connect(mTimeline.get(), SIGNAL(backingTrackChanged(QString)),
+                         mPlaybackWidget, SLOT(setMedia(QString)));
+
+        for (int i = 0; i < mTimeline->layers().size(); i++) {
+            insertLayerWidget(i, mTimeline->layer(i));
+        }
+        mPlaybackWidget->setMedia(mTimeline->backingTrack());
+    }
+}
+
 void TimelineContainer::createLayer()
 {
-    mTimeline.createLayer();
+    if (!mTimeline)
+        return;
+
+    mTimeline->createLayer();
 }
 
 void TimelineContainer::removeCurrentLayer()
 {
-    if (currentLayerIdx() != -1) {
-        mTimeline.removeLayer(currentLayerIdx());
+    if (mTimeline && currentLayerIdx() != -1) {
+        mTimeline->removeLayer(currentLayerIdx());
         mCurrentLayerIdx = -1;
     }
 }
@@ -124,7 +146,7 @@ std::shared_ptr<TimelineLayer> TimelineContainer::currentLayer()
 {
     if (currentLayerIdx() == -1)
         return nullptr;
-    return mTimeline.layer(currentLayerIdx());
+    return mTimeline->layer(currentLayerIdx());
 }
 
 void TimelineContainer::addEventToCurrentLayer(const std::shared_ptr<TimelineEvent> &event)

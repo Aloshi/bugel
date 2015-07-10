@@ -9,6 +9,7 @@
 #include <QShortcut>
 #include <QDebug>
 #include <QMessageBox>
+#include <QJsonDocument>
 
 #include "placeholderevent.h"
 
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     mTimelineContainer = findChild<TimelineContainer*>("timeline");
+    mTimelineContainer->setTimeline(Project::get()->createTimeline());
 
     // layers menu
     mLayerMenu = menuBar()->findChild<QMenu*>("menuLayer");
@@ -89,37 +91,43 @@ void MainWindow::openTimelineSettingsDialog()
     }
 }
 
-void MainWindow::open()
+void MainWindow::openProject()
 {
-    QString openPath = QFileDialog::getOpenFileName(this, "Open Timeline", "", "Bugel Timeline (*.bgl)");
+    QString openPath = QFileDialog::getOpenFileName(this, "Open Project", "", "Bugel Project (*.bgl)");
     if (!openPath.isEmpty()) {
-        mTimelineContainer->timeline()->load(openPath);
+        Project::get()->load(openPath);
+        ui->timeline->setTimeline(Project::get()->timelines()[0]);
     }
 }
 
-void MainWindow::save()
+void MainWindow::saveProject()
 {
     if (mSavePath.isEmpty()) {
-        saveAs();
+        saveProjectAs();
     } else {
-        mTimelineContainer->timeline()->save(mSavePath);
-        statusBar()->showMessage(QString("Saved to %1.").arg(mSavePath));
+        Project::get()->save(mSavePath);
+        statusBar()->showMessage(QString("Saved project to %1.").arg(mSavePath));
     }
 }
 
-void MainWindow::saveAs()
+void MainWindow::saveProjectAs()
 {
-    mSavePath = QFileDialog::getSaveFileName(this, "Save Timeline As", "", "Bugel Timeline (*.bgl)");
+    mSavePath = QFileDialog::getSaveFileName(this, "Save Project As", "", "Bugel Project (*.bgl)");
     if (!mSavePath.isEmpty())
-        save();
+        saveProject();
 }
 
-void MainWindow::exportAs()
+void MainWindow::exportTimelineAs()
 {
     QString exportPath = QFileDialog::getSaveFileName(this, "Export Timeline As", "", "JSON (*.json)");
     if (!exportPath.isEmpty()) {
         std::shared_ptr<Timeline> exportTimeline = mTimelineContainer->timeline()->process();
-        exportTimeline->save(exportPath);
+
+        QJsonDocument doc(exportTimeline->toJSON());
+        QFile file(exportPath);
+        file.open(QIODevice::WriteOnly);
+        file.write(doc.toJson());
+        file.close();
     }
 }
 
