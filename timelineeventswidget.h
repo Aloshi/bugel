@@ -23,6 +23,7 @@ protected:
     void mousePressEvent(QMouseEvent* ev) /* override */;
     void mouseMoveEvent(QMouseEvent* ev) /* override */;
     void mouseReleaseEvent(QMouseEvent* ev) /* override */;
+    bool event(QEvent* event) /* override */;
     // void contextMenuEvent(QContextMenuEvent* ev) /* override */;
 
     // hack so that clicking to gain focus doesn't affect selection
@@ -42,6 +43,9 @@ public slots:
 private:
     float pxAtTime(double time) const;
     double timeAtCursor(QMouseEvent* ev) const;
+    int eventPaintRow(const std::shared_ptr<TimelineEvent>& event) const;
+    QRectF eventPaintRect(const std::shared_ptr<TimelineEvent>& event) const;
+    std::shared_ptr<TimelineEvent> eventAtPos(const QPointF& pos);
 
     EventList* mEvents;
 

@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QShortcut>
 #include <QDebug>
+#include <QToolTip>
 
 #include "timeline.h"
 #include "timelineevent.h"
@@ -125,6 +126,20 @@ void TimelineEventsWidget::mouseReleaseEvent(QMouseEvent* ev)
     }
 }
 
+bool TimelineEventsWidget::event(QEvent* ev)
+{
+    if (ev->type() == QEvent::ToolTip) {
+        QHelpEvent* helpEvent = (QHelpEvent*)ev;
+        const auto tlEvent = eventAtPos(helpEvent->pos());
+        if (tlEvent)
+            QToolTip::showText(helpEvent->globalPos(), tlEvent->typeName(), this,
+                               eventPaintRect(tlEvent).toRect());
+        ev->accept();
+    }
+
+    return QWidget::event(ev);
+}
+
 /*
 void TimelineEventsWidget::contextMenuEvent(QContextMenuEvent* ev)
 {
@@ -144,6 +159,35 @@ void TimelineEventsWidget::contextMenuEvent(QContextMenuEvent* ev)
     ev->accept();
 }*/
 
+int TimelineEventsWidget::eventPaintRow(const std::shared_ptr<TimelineEvent>& event) const
+{
+    return (strcmp(event->typeName(), "placeholder") == 0)
+            ? event->getProperty<int>("note")
+            : 0;
+}
+
+#define SQUARE_WIDTH 8.0
+#define SQUARE_HEIGHT 8.0
+
+QRectF TimelineEventsWidget::eventPaintRect(const std::shared_ptr<TimelineEvent>& event) const
+{
+    return QRectF(pxAtTime(event->time()) - (SQUARE_WIDTH / 2.0f),
+                  eventPaintRow(event) * ((size().height() - SQUARE_HEIGHT) / 10),
+                  SQUARE_WIDTH, SQUARE_HEIGHT);
+}
+
+std::shared_ptr<TimelineEvent> TimelineEventsWidget::eventAtPos(const QPointF &pos)
+{
+    const double time = (pos.x() / (double)size().width()) * mViewLength + mViewOffset;
+    const double width = ((double)SQUARE_HEIGHT / size().width()) * mViewLength;
+    auto events = mEvents->eventsInRange(time - width / 2, time + width / 2);
+    for (auto it = events.begin(); it != events.end(); it++) {
+        if (eventPaintRect(*it).contains(pos))
+            return *it;
+    }
+    return nullptr;
+}
+
 void TimelineEventsWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
@@ -162,13 +206,8 @@ void TimelineEventsWidget::paintEvent(QPaintEvent*)
     for (int i = 0; i != events.size(); i++) {
         const auto& event = events.at(i);
 
-        const float width = 8;
-        const float height = 8;
-
-        const int editorRow = (strcmp(event->typeName(), "placeholder") == 0)
-                ? event->getProperty<int>("note")
-                : 0;
-
+        QRectF editorRect = eventPaintRect(event);
+        const int editorRow = eventPaintRow(event);
         QColor color;
         switch (editorRow) {
         case 0: color = QColor(255, 0, 0); break;
@@ -184,9 +223,7 @@ void TimelineEventsWidget::paintEvent(QPaintEvent*)
         default: color = QColor(255, 0, 0); break;
         }
 
-        const float x = pxAtTime(event->time()) - (width / 2.0f);
-        const float y = editorRow * ((size().height() - height) / 10);
-        painter.fillRect(QRectF(x, y, width, height), QBrush(color));
+        painter.fillRect(editorRect, QBrush(color));
     }
 
 
