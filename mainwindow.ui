@@ -33,8 +33,14 @@
     <property name="title">
      <string>Timeline</string>
     </property>
+    <addaction name="actionNew_Timeline"/>
+    <addaction name="actionOpen_Timeline"/>
+    <addaction name="separator"/>
     <addaction name="actionTimeline_Settings"/>
+    <addaction name="separator"/>
     <addaction name="actionExport_Timeline"/>
+    <addaction name="actionSave_Timeline"/>
+    <addaction name="actionSave_Timeline_As"/>
    </widget>
    <widget class="QMenu" name="menuLayer">
     <property name="title">
@@ -70,8 +76,7 @@
     <addaction name="separator"/>
     <addaction name="actionProject_Settings"/>
     <addaction name="separator"/>
-    <addaction name="actionSave_Project"/>
-    <addaction name="actionSave_Project_As"/>
+    <addaction name="actionClose_Project"/>
    </widget>
    <addaction name="menuProject"/>
    <addaction name="menuTimeline"/>
@@ -141,28 +146,6 @@
     <string>Timeline Settings</string>
    </property>
   </action>
-  <action name="actionSave_Project">
-   <property name="text">
-    <string>Save</string>
-   </property>
-   <property name="toolTip">
-    <string>Save Project</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionSave_Project_As">
-   <property name="text">
-    <string>Save As...</string>
-   </property>
-   <property name="toolTip">
-    <string>Save Project As</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
-   </property>
-  </action>
   <action name="actionExport_Timeline">
    <property name="text">
     <string>Export Timeline</string>
@@ -190,13 +173,41 @@
    <property name="text">
     <string>Open Project</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
   </action>
   <action name="actionAdd_User_Event">
    <property name="text">
     <string>Add Event...</string>
+   </property>
+  </action>
+  <action name="actionClose_Project">
+   <property name="text">
+    <string>Close Project</string>
+   </property>
+  </action>
+  <action name="actionNew_Timeline">
+   <property name="text">
+    <string>New Timeline</string>
+   </property>
+  </action>
+  <action name="actionOpen_Timeline">
+   <property name="text">
+    <string>Open Timeline</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_Timeline">
+   <property name="text">
+    <string>Save Timeline</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_Timeline_As">
+   <property name="text">
+    <string>Save Timeline As</string>
    </property>
   </action>
  </widget>
@@ -253,38 +264,6 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>openTimelineSettingsDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>379</x>
-     <y>265</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSave_Project</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>saveProject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>379</x>
-     <y>265</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSave_Project_As</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>saveProjectAs()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -360,13 +339,113 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionNew_Project</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>newProject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClose_Project</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>closeProject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen_Timeline</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openTimeline()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Timeline</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveTimeline()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Timeline_As</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveTimelineAs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNew_Timeline</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>newTimeline()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openTimelineSettingsDialog()</slot>
-  <slot>saveProject()</slot>
-  <slot>saveProjectAs()</slot>
   <slot>openProject()</slot>
   <slot>exportTimelineAs()</slot>
   <slot>openProjectSettingsDialog()</slot>
+  <slot>newProject()</slot>
+  <slot>newTimeline()</slot>
+  <slot>saveTimeline()</slot>
+  <slot>saveTimelineAs()</slot>
+  <slot>closeProject()</slot>
+  <slot>openTimeline()</slot>
  </slots>
 </ui>

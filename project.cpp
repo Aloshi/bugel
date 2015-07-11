@@ -2,18 +2,52 @@
 
 #include "timeline.h"
 #include "timelineevent.h"
+#include "util.h"
 
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
+#include <QDir>
+
+Project* Project::gCurrentProject = NULL;
+
+void Project::open(const QString& path)
+{
+    close();
+
+    gCurrentProject = new Project();
+    gCurrentProject->mSavePath = path;
+    gCurrentProject->fromJSON(Util::readJSON(path));
+}
+
+void Project::init(const QString& directory, const QString &name)
+{
+    close();
+
+    bool ok = QDir().mkpath(directory);
+    Q_ASSERT(ok);
+    ok = QDir().mkpath(directory + "/scripts");
+    Q_ASSERT(ok);
+    ok = QDir().mkpath(directory + "/timelines");
+    Q_ASSERT(ok);
+
+    gCurrentProject = new Project();
+    gCurrentProject->mName = name;
+    gCurrentProject->mSavePath = directory + "/" + name + ".bgp";
+    gCurrentProject->save();
+}
 
 Project* Project::get()
 {
-    static Project* gProject = NULL;
-    if (!gProject) {
-        gProject = new Project();
+    return gCurrentProject;
+}
+
+void Project::close()
+{
+    if (gCurrentProject) {
+        delete gCurrentProject;
+        gCurrentProject = NULL;
     }
-    return gProject;
 }
 
 Project::Project()
@@ -24,23 +58,14 @@ Project::Project()
     mEventTypes.push_back(placeholderType);
 }
 
-void Project::load(const QString &path)
+QString Project::root() const
 {
-    QFile file(path);
-    file.open(QIODevice::ReadOnly);
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-
-    fromJSON(doc.object());
+    return mSavePath.path();
 }
 
-void Project::save(const QString &path) const
+void Project::save() const
 {
-    QJsonDocument doc(toJSON());
-    QFile file(path);
-    file.open(QIODevice::WriteOnly);
-    file.write(doc.toJson());
-    file.close();
+    Util::writeJSON(toJSON(), mSavePath.filePath());
 }
 
 QJsonObject Project::toJSON() const
@@ -50,21 +75,19 @@ QJsonObject Project::toJSON() const
         eventTypes.push_back(it->get()->toJSON());
     }
 
-    QJsonArray timelines;
-    for (auto it = mTimelines.begin(); it != mTimelines.end(); it++) {
-        timelines.push_back(it->get()->toJSON());
-    }
-
     QJsonObject project;
+    project["name"] = mName;
+    project["lastOpenedTimeline"] = QDir(root()).relativeFilePath(mLastOpenedTimeline);
     project["eventTypes"] = eventTypes;
-    project["timelines"] = timelines;
     return project;
 }
 
 void Project::fromJSON(const QJsonObject& project)
 {
-    mTimelines.clear();
     mEventTypes.clear();
+
+    mName = project["name"].toString();
+    mLastOpenedTimeline = QDir(root()).filePath(project["lastOpenedTimeline"].toString());
 
     const QJsonArray& eventTypes = project["eventTypes"].toArray();
     for (auto it = eventTypes.begin(); it != eventTypes.end(); it++) {
@@ -72,31 +95,18 @@ void Project::fromJSON(const QJsonObject& project)
         eventType->fromJSON(it->toObject());
         mEventTypes.push_back(eventType);
     }
-
-    const QJsonArray& timelines = project["timelines"].toArray();
-    for (auto it = timelines.begin(); it != timelines.end(); it++) {
-        auto timeline = std::make_shared<Timeline>();
-        timeline->fromJSON(it->toObject());
-        mTimelines.push_back(timeline);
-    }
 }
 
 void Project::setEventTypes(const EventTypeVector& eventTypes)
 {
-    // TODO: update timelines
     mEventTypes = eventTypes;
+    save();
 }
 
-std::shared_ptr<Timeline> Project::createTimeline()
+void Project::setLastOpenedTimeline(const QString &timelinePath)
 {
-    auto timeline = std::make_shared<Timeline>();
-    mTimelines.push_back(timeline);
-    return timeline;
-}
-
-void Project::removeTimeline(const std::shared_ptr<Timeline>& timeline)
-{
-    mTimelines.removeAll(timeline);
+    mLastOpenedTimeline = timelinePath;
+    save();
 }
 
 std::shared_ptr<EventType> Project::eventType(const QString &name)

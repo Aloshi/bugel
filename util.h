@@ -1,13 +1,14 @@
 #ifndef UTIL
 #define UTIL
 
-#include <QIntegerForSize>
+#include <QString>
+#include <QJsonObject>
 
 namespace Util
 {
 
-double nsToSec(qint64 ns); // nanoseconds -> seconds
-qint64 secToNs(double sec); // seconds -> nanoseconds
+QJsonObject readJSON(const QString& path);
+void writeJSON(const QJsonObject, const QString& path);
 
 }
 

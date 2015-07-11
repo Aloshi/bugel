@@ -35,6 +35,11 @@ TimelineContainer::~TimelineContainer()
     delete ui;
 }
 
+bool TimelineContainer::dirty() const
+{
+    return true;
+}
+
 void TimelineContainer::setTimeline(const std::shared_ptr<Timeline>& timeline)
 {
     if (mTimeline)

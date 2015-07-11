@@ -3,25 +3,16 @@
 
 #include "timelinesettingsdialog.h"
 #include "projectsettingsdialog.h"
+#include "timeline.h"
 #include "project.h"
+#include "placeholderevent.h"
+#include "util.h"
 
 #include <QFileDialog>
 #include <QShortcut>
 #include <QDebug>
 #include <QMessageBox>
-#include <QJsonDocument>
-
-#include "placeholderevent.h"
-
-QAction* getAction(QMenu* menu, const QString& name)
-{
-    const auto actions = menu->actions();
-    for (auto it = actions.begin(); it != actions.end(); it++) {
-        if ((*it)->objectName() == name)
-            return *it;
-    }
-    return NULL;
-}
+#include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,35 +20,25 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mTimelineContainer = findChild<TimelineContainer*>("timeline");
-    mTimelineContainer->setTimeline(Project::get()->createTimeline());
-
-    // layers menu
-    mLayerMenu = menuBar()->findChild<QMenu*>("menuLayer");
-
     // wire placeholder actions to create a PlaceholderEvent
-    QMenu* placeholdersMenu = mLayerMenu->findChild<QMenu*>("menuAdd_Placeholder");
-    const auto placeholders = placeholdersMenu->actions();
+    const auto placeholders = ui->menuAdd_Placeholder->actions();
     for (int i = 0; i < placeholders.size(); i++) {
         QAction* action = placeholders.at(i);
         QObject::connect(action, &QAction::triggered,
                          [this, i] {
-            auto event = std::make_shared<PlaceholderEvent>(mTimelineContainer->cursor(), i);
-            mTimelineContainer->addEventToCurrentLayer(event);
+            auto event = std::make_shared<PlaceholderEvent>(ui->timeline->cursor(), i);
+            ui->timeline->addEventToCurrentLayer(event);
         });
 
-        QObject::connect(mTimelineContainer, &TimelineContainer::currentLayerChanged,
+        QObject::connect(ui->timeline, &TimelineContainer::currentLayerChanged,
                          [action](int idx) {
                 action->setEnabled(idx != -1);
         });
 
-        //QShortcut* shortcut = new QShortcut(QKeySequence(Qt::Key_1 + i), this);
-        //QObject::connect(shortcut, &QShortcut::activated,
-        //                 placeholders.at(i), &QAction::trigger);
         placeholders.at(i)->setShortcut(QKeySequence(Qt::Key_1 + i));
     }
 
-    QObject::connect(mTimelineContainer, &TimelineContainer::currentLayerChanged,
+    QObject::connect(ui->timeline, &TimelineContainer::currentLayerChanged,
                      [this](int idx) {
         statusBar()->showMessage(QString("Current layer: %1.").arg(idx));
     });
@@ -65,16 +46,17 @@ MainWindow::MainWindow(QWidget *parent) :
     // selection-related stuff
     // print a message when selection changes and
     // disable selection-related actions when we have no selection
-    QAction* deleteSelectionAction = getAction(mLayerMenu, "actionDelete_Selection");
-    QObject::connect(mTimelineContainer, &TimelineContainer::currentSelectionChanged,
-                     [this, deleteSelectionAction](const Selection& selection) {
+    QObject::connect(ui->timeline, &TimelineContainer::currentSelectionChanged,
+                     [this](const Selection& selection) {
         if (selection.state() == Selection::DONE) {
             statusBar()->showMessage(QString("Selected %1 to %2.")
                                      .arg(selection.left())
                                      .arg(selection.right()));
         }
-        deleteSelectionAction->setEnabled(selection.state() == Selection::DONE);
+        ui->actionDelete_Selection->setEnabled(selection.state() == Selection::DONE);
     });
+
+    updateTitle();
 }
 
 MainWindow::~MainWindow()
@@ -82,59 +64,192 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::openTimelineSettingsDialog()
+void MainWindow::newProject()
 {
-    TimelineSettingsDialog dlg;
-    dlg.init(*mTimelineContainer->timeline());
-    if (dlg.exec() == QDialog::Accepted) {
-        dlg.apply(*mTimelineContainer->timeline());
-    }
+    QFileInfo inputPath = QFileDialog::getSaveFileName(this, "New Project (will make subfolder)", "", "");
+    if (inputPath.filePath().isEmpty() || !closeProject())
+        return;
+
+    const QString name = inputPath.fileName();
+    const QString dir = inputPath.path() + "/" + name;
+
+    Project::init(dir, name);
+    statusBar()->showMessage(QString("Created project in %1.")
+                             .arg(Project::get()->root()));
+
+    newTimeline();
 }
 
 void MainWindow::openProject()
 {
-    QString openPath = QFileDialog::getOpenFileName(this, "Open Project", "", "Bugel Project (*.bgl)");
-    if (!openPath.isEmpty()) {
-        Project::get()->load(openPath);
-        ui->timeline->setTimeline(Project::get()->timelines()[0]);
-    }
-}
+    QString openPath = QFileDialog::getOpenFileName(this, "Open Project", "", "Bugel Project (*.bgp)");
+    if (!QFileInfo(openPath).exists() || !closeProject())
+        return;
 
-void MainWindow::saveProject()
-{
-    if (mSavePath.isEmpty()) {
-        saveProjectAs();
-    } else {
-        Project::get()->save(mSavePath);
-        statusBar()->showMessage(QString("Saved project to %1.").arg(mSavePath));
-    }
-}
+    Project::open(openPath);
+    statusBar()->showMessage(QString("Opened project %1.")
+                             .arg(openPath));
+    updateTitle();
 
-void MainWindow::saveProjectAs()
-{
-    mSavePath = QFileDialog::getSaveFileName(this, "Save Project As", "", "Bugel Project (*.bgl)");
-    if (!mSavePath.isEmpty())
-        saveProject();
-}
-
-void MainWindow::exportTimelineAs()
-{
-    QString exportPath = QFileDialog::getSaveFileName(this, "Export Timeline As", "", "JSON (*.json)");
-    if (!exportPath.isEmpty()) {
-        std::shared_ptr<Timeline> exportTimeline = mTimelineContainer->timeline()->process();
-
-        QJsonDocument doc(exportTimeline->toJSON());
-        QFile file(exportPath);
-        file.open(QIODevice::WriteOnly);
-        file.write(doc.toJson());
-        file.close();
+    const QString lastPath = Project::get()->lastOpenedTimeline();
+    if (QFileInfo(lastPath).exists()) {
+        openTimeline(lastPath);
     }
 }
 
 void MainWindow::openProjectSettingsDialog()
 {
+    if (!Project::get())
+        return;
+
     ProjectSettingsDialog dlg(Project::get());
     if (dlg.exec() == QDialog::Accepted) {
         dlg.apply(Project::get());
+    }
+}
+
+bool MainWindow::closeProject()
+{
+    if (!closeTimeline())
+        return false;
+
+    Project::close();
+    updateTitle();
+    return true;
+}
+
+
+void MainWindow::newTimeline()
+{
+    if (Project::get() == nullptr || !closeTimeline())
+        return;
+
+    ui->timeline->setTimeline(std::make_shared<Timeline>());
+    mTimelinePath = "";
+    updateTitle();
+}
+
+void MainWindow::openTimeline()
+{
+    if (Project::get() == nullptr)
+        return;
+
+    QString openPath = QFileDialog::getOpenFileName(this, "Open Timeline",
+                                                    Project::get()->root() + "/timelines",
+                                                    "Bugel Timeline (*.bgt)");
+    openTimeline(openPath);
+}
+
+void MainWindow::openTimeline(const QString& openPath)
+{
+    if (Project::get() == nullptr)
+        return;
+
+    QFileInfo file(openPath);
+    if (!file.exists() || !closeTimeline())
+        return;
+
+    auto timeline = std::make_shared<Timeline>();
+    timeline->fromJSON(Util::readJSON(openPath));
+    ui->timeline->setTimeline(timeline);
+    Project::get()->setLastOpenedTimeline(file.filePath());
+    mTimelinePath = openPath;
+    statusBar()->showMessage(QString("Opened timeline %1.")
+                             .arg(openPath));
+    updateTitle();
+}
+
+void MainWindow::openTimelineSettingsDialog()
+{
+    if (!Project::get() || ui->timeline->timeline() == nullptr)
+        return;
+
+    TimelineSettingsDialog dlg;
+    dlg.init(*ui->timeline->timeline());
+    if (dlg.exec() == QDialog::Accepted) {
+        dlg.apply(*ui->timeline->timeline());
+    }
+}
+
+bool MainWindow::saveTimeline()
+{
+    if (!Project::get() || ui->timeline->timeline() == nullptr)
+        return false;
+
+    if (mTimelinePath.isEmpty())
+        return saveTimelineAs();
+
+    Util::writeJSON(ui->timeline->timeline()->toJSON(), mTimelinePath);
+    Project::get()->setLastOpenedTimeline(mTimelinePath);
+    statusBar()->showMessage(QString("Saved timeline to %1.")
+                             .arg(mTimelinePath));
+    updateTitle();
+    return true;
+}
+
+bool MainWindow::saveTimelineAs()
+{
+    if (!Project::get() || ui->timeline->timeline() == nullptr)
+        return false;
+
+    QString path = QFileDialog::getSaveFileName(this, "Save Timeline As",
+                                                 Project::get()->root() + "/timelines",
+                                                 "Bugel Timeline (*.bgt)");
+    if (path.isEmpty())
+        return false;
+
+    mTimelinePath = path;
+    return saveTimeline();
+}
+
+void MainWindow::exportTimelineAs()
+{
+    if (!Project::get() || ui->timeline->timeline() == nullptr)
+        return;
+
+    QString exportPath = QFileDialog::getSaveFileName(this, "Export Timeline As", "", "JSON (*.json)");
+    if (!exportPath.isEmpty()) {
+        std::shared_ptr<Timeline> exportTimeline = ui->timeline->timeline()->process();
+        Util::writeJSON(exportTimeline->toJSON(), exportPath);
+        statusBar()->showMessage(QString("Exported timeline to %1.").arg(exportPath));
+    }
+}
+
+bool MainWindow::closeTimeline()
+{
+    // already closed?
+    if (ui->timeline->timeline() == nullptr)
+        return true;
+
+    // if timeline is dirty, prompt to save/discard/cancel
+    if (ui->timeline->dirty()) {
+        QMessageBox:: StandardButton res =
+                QMessageBox::question(this, "Save Timeline?",
+                "The open timeline has not been saved.",
+                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                QMessageBox::Cancel);
+
+        // user clicked cancel on the question or cancelled during the save (ambiguous)
+        if (res == QMessageBox::Cancel || (res == QMessageBox::Save && !saveTimeline()))
+            return false;
+    }
+
+    // ok, we can close
+    ui->timeline->setTimeline(nullptr);
+    updateTitle();
+    return true;
+}
+
+void MainWindow::updateTitle()
+{
+    QString proj = Project::get() ? Project::get()->name() : "";
+    QString tl = ui->timeline->timeline() ? QFileInfo(mTimelinePath).fileName() : "";
+
+    if (!proj.isEmpty() && !tl.isEmpty()) {
+        setWindowTitle(QString("%1 [%2]").arg(tl).arg(proj));
+    } else if (!proj.isEmpty()) {
+        setWindowTitle(QString("[%1]").arg(proj));
+    } else {
+        setWindowTitle("Bugel");
     }
 }

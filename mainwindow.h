@@ -18,20 +18,26 @@ public:
     ~MainWindow();
 
 private slots:
+    void newProject();
     void openProject();
     void openProjectSettingsDialog();
-    void saveProject();
-    void saveProjectAs();
+    bool closeProject();
 
+    void newTimeline();
+    void openTimeline();
     void openTimelineSettingsDialog();
+    bool saveTimeline();
+    bool saveTimelineAs();
     void exportTimelineAs();
+    bool closeTimeline();
 
 private:
+    void openTimeline(const QString& path);
+    void updateTitle();
+
     Ui::MainWindow *ui;
 
-    QMenu* mLayerMenu;
-    TimelineContainer* mTimelineContainer;
-    QString mSavePath;
+    QString mTimelinePath;  // path to save the currently opened timeline
 };
 
 #endif // MAINWINDOW_H

@@ -30,6 +30,8 @@ public:
 
     void setTimeline(const std::shared_ptr<Timeline>& timeline);
 
+    bool dirty() const;
+
 protected:
     void wheelEvent(QWheelEvent* ev) /* override */;
 

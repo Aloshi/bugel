@@ -28,9 +28,6 @@ private slots:
 
 private:
     Ui::TimelineSettingsDialog *ui;
-
-    QLineEdit* mBackingTrack;
-    QSpinBox* mBPM;
 };
 
 #endif // TIMELINESETTINGSDIALOG_H

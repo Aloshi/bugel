@@ -1,16 +1,29 @@
 #include "util.h"
 
+#include <QFile>
+#include <QJsonDocument>
+
 namespace Util
 {
 
-double nsToSec(qint64 ns)
+QJsonObject readJSON(const QString& path)
 {
-    return ns * (1.0e-9);
+    QFile file(path);
+    bool opened = file.open(QIODevice::ReadOnly);
+    Q_ASSERT(opened);
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+    return doc.object();
 }
 
-qint64 secToNs(double sec)
+void writeJSON(const QJsonObject json, const QString &path)
 {
-    return sec / (1.0e-9);
+    QJsonDocument doc(json);
+    QFile file(path);
+    bool opened = file.open(QIODevice::WriteOnly);
+    Q_ASSERT(opened);
+    file.write(doc.toJson());
+    file.close();
 }
 
 }

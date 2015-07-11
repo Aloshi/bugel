@@ -5,8 +5,10 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QDir>
 
 #include "luascriptcontext.h"
+#include "project.h"
 
 Timeline::Timeline()
     : mBPM(120)
@@ -54,7 +56,21 @@ QJsonObject Timeline::toJSON() const
     }
 
     QJsonObject timeline;
-    timeline["backingTrack"] = mBackingTrack;
+
+    // can we make it backing track relative?
+    if (Project::get() != nullptr) {
+        QDir dir(Project::get()->root());
+        QString relPath = dir.relativeFilePath(mBackingTrack);
+
+        // if it goes out of the project directory, forget it
+        if (relPath.startsWith(".."))
+            timeline["backingTrack"] = mBackingTrack;
+        else
+            timeline["backingTrack"] = relPath;
+    } else {
+        timeline["backingTrack"] = mBackingTrack;
+    }
+
     timeline["bpm"] = mBPM;
     timeline["layers"] = layers;
     return timeline;
@@ -62,8 +78,15 @@ QJsonObject Timeline::toJSON() const
 
 void Timeline::fromJSON(const QJsonObject& timeline)
 {
-    // backing track
     setBackingTrack(timeline["backingTrack"].toString());
+
+    if (Project::get() != nullptr && !QFileInfo(mBackingTrack).exists()) {
+        QDir dir(Project::get()->root());
+        QFileInfo path = dir.filePath(mBackingTrack);
+        if (path.exists())
+            setBackingTrack(path.filePath());
+    }
+
     setBPM(timeline["bpm"].toDouble());
 
     // layers
