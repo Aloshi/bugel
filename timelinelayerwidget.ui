@@ -104,5 +104,25 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_edit_script</sender>
+   <signal>clicked()</signal>
+   <receiver>TimelineLayerWidget</receiver>
+   <slot>editScript()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>731</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>389</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>editScript()</slot>
+ </slots>
 </ui>

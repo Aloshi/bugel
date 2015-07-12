@@ -109,8 +109,17 @@ std::shared_ptr<Timeline> Timeline::process() const
         std::shared_ptr<TimelineLayer> newLayer = timeline->createLayer();
         newLayer->setName(sourceLayer->get()->name());
 
-        LuaScriptContext script(sourceLayer->get()->script());
-        script.process(sourceLayer->get(), newLayer.get());
+        if (QFileInfo(sourceLayer->get()->scriptPath()).exists()) {
+            LuaScriptContext script(sourceLayer->get()->scriptPath());
+            script.process(sourceLayer->get(), newLayer.get());
+        } else {
+            // should reaaaaally do a deep copy here
+            // but right now the process()'d timeline is just saved and discarded
+            const auto& events = sourceLayer->get()->events();
+            for (auto ev = events.begin(); ev != events.end(); ev++) {
+                newLayer->events().addEvent(*ev);
+            }
+        }
     }
 
     return timeline;

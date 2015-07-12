@@ -34,6 +34,9 @@ public slots:
     void setViewport(double startTime, double length);
     void setCursor(double time);
 
+private slots:
+    void editScript();
+
 private:
     Ui::TimelineLayerWidget *ui;
 

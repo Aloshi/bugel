@@ -47,7 +47,7 @@ TimelineEvent::TimelineEvent(const std::shared_ptr<EventType>& type, double time
 
             // make sure the default value is the right type
             bool conv = mProperties[it.key()].convert(it->type);
-            Q_ASSERT(conv);
+            // Q_ASSERT(conv);
         }
     }
 }

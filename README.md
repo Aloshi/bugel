@@ -15,13 +15,13 @@ You may be able to easily find the timing you want, but you'll probably need to 
 How It Works
 ============
 
-* A **timeline** holds information like backing track, BPM of backing track, and multiple timeline **layer**s.
-* A **layer* has a name, post-processing script, and list of events.
+* A **timeline** holds information like backing track, BPM of backing track, and multiple timeline **layers**.
+* A **layer** has a name, post-processing script, and list of events.
 
-* Use Bugel's GUI to add **placeholder event**s to a layer in time with music.
+* Use Bugel's GUI to add **placeholder events** to a layer in time with music.
   - This is done by pressing the 1-9 keys on your keyboard with a layer selected as the song plays.
   - You can also add actual events directly into the timeline. (NOT DONE YET)
-* Write a **post-processing script** in Lua to convert **placeholder event**s into actual events for your application.
+* Write a **post-processing script** in Lua to convert **placeholder events** into actual events for your application.
   - This allows you to easily keep event timing, but change what your events do.
   - You can also create additional events, as well as adjust timing. For example, you might want to add a "start windup animation" event 0.5 seconds before your attack event.
 * Export your post-processed timeline as JSON. XML possibly coming later.
@@ -33,7 +33,6 @@ TODO
 * Make TimelineEvent::typeName return a fucking QString
 * Remove type and time arguments from addEvent, make it just one table
 * BPM Snapping
-* Add a way to create/delete/switch timelines in MainWindow
 * Add preview of exported timeline
 * Add event properties display to TimelineEventsWidget
 * A way to pass arguments from GUI to script

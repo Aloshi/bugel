@@ -16,6 +16,7 @@ public:
     // getters
     inline const QString& name() const { return mName; }
     inline const QString& script() const { return mScript; }
+    QString scriptPath() const;
     inline const EventList& events() const { return mEvents; }
     inline EventList& events() { return mEvents; }
 
