@@ -12,6 +12,7 @@
 #include <QShortcut>
 #include <QDebug>
 #include <QMessageBox>
+#include <QSettings>
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -82,9 +83,16 @@ void MainWindow::newProject()
 
 void MainWindow::openProject()
 {
-    QString openPath = QFileDialog::getOpenFileName(this, "Open Project", "", "Bugel Project (*.bgp)");
+    QSettings settings;
+    const char* key = "mainwindow/lastOpenedProject";
+
+    QString openPath = QFileDialog::getOpenFileName(this, "Open Project",
+                                                    settings.value(key, "").toString(),
+                                                    "Bugel Project (*.bgp)");
     if (!QFileInfo(openPath).exists() || !closeProject())
         return;
+
+    settings.setValue(key, openPath);
 
     Project::open(openPath);
     statusBar()->showMessage(QString("Opened project %1.")
@@ -92,7 +100,7 @@ void MainWindow::openProject()
     updateTitle();
 
     const QString lastPath = Project::get()->lastOpenedTimeline();
-    if (QFileInfo(lastPath).exists()) {
+    if (QFileInfo(lastPath).isFile()) {
         openTimeline(lastPath);
     }
 }

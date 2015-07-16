@@ -87,7 +87,8 @@ void Project::fromJSON(const QJsonObject& project)
     mEventTypes.clear();
 
     mName = project["name"].toString();
-    mLastOpenedTimeline = QDir(root()).filePath(project["lastOpenedTimeline"].toString());
+    if (!project["lastOpenedTimeline"].toString().isEmpty())
+        mLastOpenedTimeline = QDir(root()).filePath(project["lastOpenedTimeline"].toString());
 
     const QJsonArray& eventTypes = project["eventTypes"].toArray();
     for (auto it = eventTypes.begin(); it != eventTypes.end(); it++) {
