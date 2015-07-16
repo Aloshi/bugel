@@ -34,6 +34,7 @@ public:
 
 protected:
     void wheelEvent(QWheelEvent* ev) /* override */;
+    void keyPressEvent(QKeyEvent* ev) /* override */;
 
 signals:
     void currentLayerChanged(int idx); // idx == -1 if no layer is selected.

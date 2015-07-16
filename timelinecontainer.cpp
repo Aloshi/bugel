@@ -119,6 +119,14 @@ void TimelineContainer::wheelEvent(QWheelEvent* ev)
     QApplication::sendEvent(mTimelineWidget, ev);
 }
 
+void TimelineContainer::keyPressEvent(QKeyEvent* ev)
+{
+    if (ev->key() == Qt::Key_Space) {
+        ui->playback_widget->togglePlaying();
+        ev->accept();
+    }
+}
+
 double TimelineContainer::cursor() const
 {
     return mTimelineWidget->cursor();
