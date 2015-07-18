@@ -39,6 +39,7 @@ public slots:
     void setEventSource(EventList* events);
     void setViewport(double startTime, double length);
     void setCursor(double time);
+    void setSnapInterval(double interval);  // in seconds
 
 private:
     float pxAtTime(double time) const;
@@ -53,6 +54,7 @@ private:
     double mViewOffset;
     double mViewLength;
     Selection mSelection;
+    double mSnapInterval;
 
     // hack so that clicking to gain focus doesn't affect selection
     bool mIgnoreNextClick;

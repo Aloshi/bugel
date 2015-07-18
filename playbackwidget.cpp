@@ -21,6 +21,8 @@ PlaybackWidget::PlaybackWidget(QWidget *parent) :
     QObject::connect(&mMediaPlayer, &QMediaPlayer::durationChanged,
                      this, &PlaybackWidget::mediaPlayerDurationChanged);
 
+    QObject::connect(ui->sb_snapping, SIGNAL(valueChanged(double)),
+                     this, SIGNAL(snappingChanged(double)));
 
     mMediaPlayer.setNotifyInterval(0);
 }
@@ -64,4 +66,9 @@ void PlaybackWidget::mediaPlayerDurationChanged(qint64 ms)
 void PlaybackWidget::setMedia(const QString &str)
 {
     setMedia(QMediaContent(QUrl(str)));
+}
+
+double PlaybackWidget::snapSteps() const
+{
+    return ui->sb_snapping->value();
 }

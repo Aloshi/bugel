@@ -14,6 +14,7 @@ TimelineEventsWidget::TimelineEventsWidget(QWidget *parent) : QWidget(parent)
 {
     mEvents = NULL;
 
+    mSnapInterval = 0;
     mCursor = 0;
     mViewOffset = 0;
     mViewLength = 60;
@@ -188,6 +189,12 @@ std::shared_ptr<TimelineEvent> TimelineEventsWidget::eventAtPos(const QPointF &p
     return nullptr;
 }
 
+void TimelineEventsWidget::setSnapInterval(double snapInterval)
+{
+    mSnapInterval = snapInterval;
+    update();
+}
+
 void TimelineEventsWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
@@ -200,6 +207,15 @@ void TimelineEventsWidget::paintEvent(QPaintEvent*)
 
     if (!mEvents)
         return;
+
+    // draw snap lines
+    if (mSnapInterval != 0) {
+        const double start = mViewOffset - fmod(mViewOffset, mSnapInterval);
+        for (double time = start; time < mViewOffset + mViewLength; time += mSnapInterval) {
+            const float x = pxAtTime(time);
+            painter.fillRect(QRectF(x - 0.5f, 0, 1, height()), QColor(88, 88, 88));
+        }
+    }
 
     // draw events
     auto events = mEvents->eventsInRange(mViewOffset, mViewOffset + mViewLength);

@@ -86,3 +86,8 @@ void TimelineLayerWidget::editScript()
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
+
+void TimelineLayerWidget::setSnapInterval(double interval)
+{
+    mEventsWidget->setSnapInterval(interval);
+}

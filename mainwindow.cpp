@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QAction* action = placeholders.at(i);
         QObject::connect(action, &QAction::triggered,
                          [this, i] {
-            auto event = std::make_shared<PlaceholderEvent>(ui->timeline->cursor(), i);
+            auto event = std::make_shared<PlaceholderEvent>(ui->timeline->cursorSnapped(), i);
             ui->timeline->addEventToCurrentLayer(event);
         });
 

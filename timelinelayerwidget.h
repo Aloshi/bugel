@@ -33,6 +33,7 @@ signals:
 public slots:
     void setViewport(double startTime, double length);
     void setCursor(double time);
+    void setSnapInterval(double interval);
 
 private slots:
     void editScript();

@@ -9,6 +9,11 @@
 #include "timelinewidget.h"
 #include "playbackwidget.h"
 
+double snapInterval(double bpm, double step)
+{
+    return step / (bpm / 60.0);
+}
+
 TimelineContainer::TimelineContainer(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TimelineContainer)
@@ -28,6 +33,12 @@ TimelineContainer::TimelineContainer(QWidget *parent) :
                      mTimelineWidget, &TimelineWidget::setLength);
     QObject::connect(mTimelineWidget, &TimelineWidget::timeClicked,
                      mPlaybackWidget, &PlaybackWidget::setPosition);
+    QObject::connect(mPlaybackWidget, &PlaybackWidget::snappingChanged,
+                     [this] (double step) {
+        if (!timeline())
+            return;
+        emit snapIntervalChanged(snapInterval(timeline()->bpm(), step));
+    });
 }
 
 TimelineContainer::~TimelineContainer()
@@ -63,6 +74,9 @@ void TimelineContainer::setTimeline(const std::shared_ptr<Timeline>& timeline)
             insertLayerWidget(i, mTimeline->layer(i));
         }
         mPlaybackWidget->setMedia(mTimeline->backingTrack());
+
+        if (ui->playback_widget->snapSteps() != 0)
+            emit snapIntervalChanged(snapInterval(mTimeline->bpm(), ui->playback_widget->snapSteps()));
     }
 }
 
@@ -100,6 +114,9 @@ void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer
             setCurrentLayerIdx(-1);
     });
 
+    QObject::connect(this, &TimelineContainer::snapIntervalChanged,
+                     widget, &TimelineLayerWidget::setSnapInterval);
+
     QObject::connect(widget, &TimelineLayerWidget::selectionChanged,
                      this, &TimelineContainer::currentSelectionChanged);
 
@@ -130,6 +147,16 @@ void TimelineContainer::keyPressEvent(QKeyEvent* ev)
 double TimelineContainer::cursor() const
 {
     return mTimelineWidget->cursor();
+}
+
+double TimelineContainer::cursorSnapped() const
+{
+    if (mTimeline == nullptr || ui->playback_widget->snapSteps() == 0)
+        return cursor();
+
+    const double interval = snapInterval(mTimeline->bpm(), ui->playback_widget->snapSteps());
+    const double cursor = mTimelineWidget->cursor();
+    return round(cursor / interval) * interval;
 }
 
 void TimelineContainer::setCurrentLayerIdx(int idx)

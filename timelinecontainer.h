@@ -26,6 +26,7 @@ public:
     ~TimelineContainer();
 
     double cursor() const;
+    double cursorSnapped() const;
     inline std::shared_ptr<Timeline> timeline() { return mTimeline; }
 
     void setTimeline(const std::shared_ptr<Timeline>& timeline);
@@ -39,6 +40,7 @@ protected:
 signals:
     void currentLayerChanged(int idx); // idx == -1 if no layer is selected.
     void currentSelectionChanged(const Selection& selection);
+    void snapIntervalChanged(double interval);
 
 public slots:
     void createLayer();

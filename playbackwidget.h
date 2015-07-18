@@ -18,9 +18,12 @@ public:
     explicit PlaybackWidget(QWidget *parent = 0);
     ~PlaybackWidget();
 
+    double snapSteps() const;
+
 signals:
     void positionChanged(double time); // in seconds
     void durationChanged(double duration); // in seconds
+    void snappingChanged(double step);
 
 public slots:
     void setMedia(const QMediaContent& media);

@@ -31,8 +31,6 @@ TODO
 ====
 
 * Make TimelineEvent::typeName return a fucking QString
-* Remove type and time arguments from addEvent, make it just one table
-* BPM Snapping
 * Add preview of exported timeline
 * Add event properties display to TimelineEventsWidget
 * A way to pass arguments from GUI to script
