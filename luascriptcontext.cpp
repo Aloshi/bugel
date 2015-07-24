@@ -180,7 +180,7 @@ void LuaScriptContext::process(const TimelineLayer* sourceLayer, TimelineLayer* 
         lua_pushnumber(state, it->get()->time());
         lua_setfield(state, -2, "time");
 
-        // copy properties (TODO)
+        // copy properties
         const auto& properties = it->get()->properties();
         for (auto propIt = properties.begin(); propIt != properties.end(); propIt++) {
             luaPushVariant(state, propIt.value());

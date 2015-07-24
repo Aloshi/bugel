@@ -26,6 +26,7 @@ public:
     const Selection& selection() const;
 
 signals:
+    void requestSetCursor(double time);
     void selectionChanged(const Selection& selection);
     void focusGained();
     void focusLost();

@@ -43,6 +43,8 @@ TimelineLayerWidget::TimelineLayerWidget(const std::shared_ptr<TimelineLayer>& l
                      this, &TimelineLayerWidget::focusLost);
     QObject::connect(mEventsWidget, &TimelineEventsWidget::selectionChanged,
                      this, &TimelineLayerWidget::selectionChanged);
+    QObject::connect(mEventsWidget, &TimelineEventsWidget::singleClicked,
+                     this, &TimelineLayerWidget::requestSetCursor);
 }
 
 TimelineLayerWidget::~TimelineLayerWidget()

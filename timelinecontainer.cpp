@@ -120,6 +120,9 @@ void TimelineContainer::insertLayerWidget(int idx, std::shared_ptr<TimelineLayer
     QObject::connect(widget, &TimelineLayerWidget::selectionChanged,
                      this, &TimelineContainer::currentSelectionChanged);
 
+    QObject::connect(widget, &TimelineLayerWidget::requestSetCursor,
+                     mPlaybackWidget, &PlaybackWidget::setPosition);
+
     mLayerLayout->insertWidget(idx, widget);
 }
 

@@ -31,6 +31,7 @@ protected:
     void focusOutEvent(QFocusEvent* ev) /* override */;
 
 signals:
+    void singleClicked(double time);
     void selectionChanged(const Selection& selection);
     void focusGained();
     void focusLost();
@@ -54,6 +55,7 @@ private:
     double mViewOffset;
     double mViewLength;
     Selection mSelection;
+    bool mHadSelection;
     double mSnapInterval;
 
     // hack so that clicking to gain focus doesn't affect selection

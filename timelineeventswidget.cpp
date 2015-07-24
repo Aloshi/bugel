@@ -92,6 +92,7 @@ void TimelineEventsWidget::mousePressEvent(QMouseEvent* ev)
             ev->accept();
             return;
         }
+        mHadSelection = (mSelection.state() != Selection::EMPTY);
         mSelection.reset();
 
         const double time = timeAtCursor(ev);
@@ -118,8 +119,11 @@ void TimelineEventsWidget::mouseReleaseEvent(QMouseEvent* ev)
         mSelection.setDone();
 
         // ignore very small selections
-        if (mSelection.length() < 1.0 / pxPerSecond())
+        if (mSelection.length() < 1.0 / pxPerSecond()) {
             mSelection.reset();
+            if (!mHadSelection)
+                emit singleClicked(timeAtCursor(ev));
+        }
 
         emit selectionChanged(mSelection);
         update();
